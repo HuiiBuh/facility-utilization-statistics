@@ -1,10 +1,10 @@
 {
   "name": "climbing",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "A little web server with frontend which gathers statistics about the capacity of the local climbing gyms.",
+  "author": "HuiiBuh",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "AGPL",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
