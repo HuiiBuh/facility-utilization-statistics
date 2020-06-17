@@ -7,7 +7,18 @@ export class AppController {
     }
 
     @Get()
-    getHello(): string {
-        return this.appService.getHello();
+    home(): string {
+        return `<a href="/bloeckle">Blöckle</a>
+                <a href="/kletterbox">Kletterbox</a>`;
+    }
+
+    @Get('bloeckle')
+    getBloeckle(): any {
+        return this.appService.getBloeckle();
+    }
+
+    @Get('kletterbox')
+    getKletterbox(): any {
+        return this.appService.getKletterbox();
     }
 }

@@ -1,123 +1,14 @@
-import * as fs from 'fs';
+import {Injectable} from '@nestjs/common';
 import ApiClient from './ApiClient';
+import DataStorage from './Storage';
 
-class DataStorage {
-    private data = {};
-    private _saveData = false;
-
-    private readonly startHour = 1;
-    private readonly endHour = 24;
-
-    public saveInterval = 10 * 60 * 1000;
-    private readonly fileName: string;
-
-    constructor(startHour, endHour, fileName = 'data.json') {
-        this.startHour = startHour;
-        this.endHour = endHour;
-        this.fileName = fileName;
-    }
-
-    private startAutoSaver() {
-        setTimeout(async () => {
-            while (this._saveData) {
-                await this.writeToFile();
-                await sleep(this.saveInterval);
-            }
-            await this.writeToFile();
-        }, 0);
-    }
-
-    private static getWeek() {
-        const date = new Date();
-        date.setHours(0, 0, 0, 0);
-        // Thursday in current week decides the year.
-        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-        // January 4 is always in week 1.
-        const week1 = new Date(date.getFullYear(), 0, 4);
-        // Adjust to Thursday in week 1 and count number of weeks from date to week1.
-        return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-    }
-
-    set saveData(value: boolean) {
-        this._saveData = value;
-        if (this._saveData) {
-            this.startAutoSaver();
-        }
-    }
-
-    get saveData(): boolean {
-        return this._saveData;
-    }
-
-    public async loadFromFile(fileName = this.fileName) {
-        return new Promise((resolve, reject) => {
-            fs.readFile(fileName, (err, data) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                this.data = JSON.parse(data.toString('utf8'));
-                resolve();
-            });
-        });
-    }
-
-    public writeToFile(fileName = this.fileName) {
-        return new Promise(((resolve) => {
-            const dataString = JSON.stringify(this.data);
-            fs.writeFile(fileName, dataString, resolve);
-        }));
-    }
-
-    public setInformation(data, keys = DataStorage.getJSONKeys()) {
-        if (!this.data[keys.year]) {
-            this.data[keys.year] = {};
-        }
-
-        if (!this.data[keys.year][keys.week]) {
-            this.data[keys.year][keys.week] = {};
-        }
-
-        if (!this.data[keys.year][keys.week][keys.day]) {
-            this.data[keys.year][keys.week][keys.day] = {};
-
-            for (let i = this.startHour; i <= this.endHour; ++i) {
-                this.data[keys.year][keys.week][keys.day][i] = {
-                    value: 0,
-                    valueCount: 0
-                };
-            }
-        }
-
-        let valueCount: number = this.data[keys.year][keys.week][keys.day][keys.hour].valueCount;
-        this.data[keys.year][keys.week][keys.day][keys.hour].valueCount = ++valueCount;
-
-        let value = this.data[keys.year][keys.week][keys.day][keys.hour].value;
-        value = value * (valueCount - 1) / valueCount;
-        value += data / valueCount;
-        this.data[keys.year][keys.week][keys.day][keys.hour].value = value;
-    }
-
-    public static getJSONKeys() {
-        const currentDate = new Date();
-
-        return {
-            day: currentDate.toLocaleString('en-us', {weekday: 'long'}),
-            year: currentDate.getFullYear(),
-            week: DataStorage.getWeek(),
-            hour: currentDate.getHours()
-        };
-    }
-
-}
-
-
-class DataLoader {
+@Injectable()
+export default class DataLoader {
     private static bloeckleURL = 'https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined';
-    private bloeckle = new DataStorage(1, 24, 'db/bloeckle.json');
+    public bloeckle = new DataStorage(1, 24, 'db/bloeckle.json');
 
     private static kletterboxURL = 'https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM';
-    private kletterbox = new DataStorage(1, 24, 'db/kletterbox.json');
+    public kletterbox = new DataStorage(1, 24, 'db/kletterbox.json');
 
 
     public async loadDataFromFile(): Promise<void> {
@@ -130,12 +21,17 @@ class DataLoader {
         this.kletterbox.saveData = true;
     }
 
+    public async saveAllData(): Promise<void> {
+        await this.bloeckle.writeToFile();
+        await this.kletterbox.writeToFile();
+    }
+
     public endSaveDaemon(): void {
         this.bloeckle.saveData = false;
         this.kletterbox.saveData = false;
     }
 
-    public startLoadingData(): void {
+    public startCrawlingData(): void {
         this.loadBloeckleData();
         this.loadKletterboxData();
     }
@@ -209,15 +105,6 @@ class DataLoader {
     }
 }
 
-
-export async function main(): Promise<void> {
-    const loader = new DataLoader();
-    await loader.loadDataFromFile();
-    loader.startSaveDaemon();
-    loader.startLoadingData();
-}
-
-
 function getFormattedDate() {
     const currentDate = new Date();
     let formatted_date = currentDate.getDate() + '.' + (currentDate.getMonth() + 1) + '.' + currentDate.getFullYear() + ' ';
@@ -225,6 +112,6 @@ function getFormattedDate() {
     return formatted_date;
 }
 
-async function sleep(ms) {
+async function sleep(ms): Promise<void> {
     return new Promise((resolve => setTimeout(() => resolve(), ms)));
 }
