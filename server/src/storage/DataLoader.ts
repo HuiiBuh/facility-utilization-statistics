@@ -5,10 +5,10 @@ import DataStorage from './Storage';
 @Injectable()
 export default class DataLoader {
     private static bloeckleURL = 'https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined';
-    public bloeckle = new DataStorage(1, 24, 'db/bloeckle.json');
+    public bloeckle = new DataStorage(50, 'db/bloeckle.json');
 
     private static kletterboxURL = 'https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM';
-    public kletterbox = new DataStorage(1, 24, 'db/kletterbox.json');
+    public kletterbox = new DataStorage(30, 'db/kletterbox.json');
 
 
     public async loadDataFromFile(): Promise<void> {
@@ -46,7 +46,7 @@ export default class DataLoader {
             try {
                 this.bloeckle.setInformation(DataLoader.extractBloeckleData(response));
             } catch (e) {
-                console.log('Could not extract the data');
+                console.error(e);
             }
             await sleep(5 * 60 * 1000);
         }
@@ -77,7 +77,7 @@ export default class DataLoader {
             try {
                 this.kletterbox.setInformation(DataLoader.extractKletterboxData(response));
             } catch (e) {
-                console.log('Could not extract the data');
+                console.error(e);
             }
             await sleep(5 * 60 * 1000);
         }
@@ -105,13 +105,13 @@ export default class DataLoader {
     }
 }
 
-function getFormattedDate() {
+function getFormattedDate(): string {
     const currentDate = new Date();
     let formatted_date = currentDate.getDate() + '.' + (currentDate.getMonth() + 1) + '.' + currentDate.getFullYear() + ' ';
     formatted_date += currentDate.getHours() + ':' + currentDate.getMinutes();
     return formatted_date;
 }
 
-async function sleep(ms): Promise<void> {
+export async function sleep(ms: number): Promise<void> {
     return new Promise((resolve => setTimeout(() => resolve(), ms)));
 }

@@ -1,5 +1,5 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
-import DataLoader from './storage/DataLoader';
+import DataLoader, {sleep} from './storage/DataLoader';
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -11,6 +11,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
         await this.dataLoader.loadDataFromFile();
         this.dataLoader.startSaveDaemon();
         this.dataLoader.startCrawlingData();
+
+        await sleep(5000);
+        await this.dataLoader.saveAllData();
     }
 
     getBloeckle(): any {
@@ -22,8 +25,8 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     }
 
     async onModuleDestroy(): Promise<void> {
-        await this.dataLoader.saveAllData();
         this.dataLoader.endSaveDaemon();
+        await this.dataLoader.saveAllData();
     }
 
 }
