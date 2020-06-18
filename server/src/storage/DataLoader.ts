@@ -1,19 +1,20 @@
-import {Injectable} from '@nestjs/common';
-import ApiClient from './ApiClient';
-import DataStorage from './Storage';
+import {Injectable} from "@nestjs/common";
+
+import ApiClient from "./ApiClient";
+import DataStorage from "./Storage";
 
 @Injectable()
 export default class DataLoader {
-    private static bloeckleURL = 'https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined';
-    public bloeckle = new DataStorage(50, 'db/bloeckle.json');
+    private static bloeckleURL = "https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined";
+    public bloeckle = new DataStorage(50, "db/bloeckle.json");
 
-    private static kletterboxURL = 'https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM';
-    public kletterbox = new DataStorage(30, 'db/kletterbox.json');
+    private static kletterboxURL = "https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM";
+    public kletterbox = new DataStorage(30, "db/kletterbox.json");
 
 
     public async loadDataFromFile(): Promise<void> {
-        await this.bloeckle.loadFromFile().catch(() => console.log('Could not load the bloeckle database.'));
-        await this.kletterbox.loadFromFile().catch(() => console.log('Could not load the kletterbox database.'));
+        await this.bloeckle.loadFromFile().catch((e) => console.log("Could not load the bloeckle database.\n", e));
+        await this.kletterbox.loadFromFile().catch((e) => console.log("Could not load the kletterbox database.\n", e));
     }
 
     public startSaveDaemon(): void {
@@ -41,7 +42,7 @@ export default class DataLoader {
         const apiClient = new ApiClient();
         while (true) {
             let response: string | void = await apiClient.get(DataLoader.bloeckleURL).catch((error) => console.log(error));
-            if (!response) response = '';
+            if (!response) response = "";
 
             try {
                 this.bloeckle.setInformation(DataLoader.extractBloeckleData(response));
@@ -57,7 +58,7 @@ export default class DataLoader {
         const startMatch: RegExpExecArray = startRegex.exec(data);
         const startIndex: number = startMatch.index + startMatch[0].length;
 
-        const endRegex = new RegExp('% *;');
+        const endRegex = new RegExp("% *;");
         const endMatch: RegExpExecArray = endRegex.exec(data);
         const endIndex = endMatch.index;
 
@@ -71,7 +72,7 @@ export default class DataLoader {
         const apiClient = new ApiClient();
         while (true) {
             let response: string | void = await apiClient.get(DataLoader.kletterboxURL).catch((error) => console.log(error));
-            if (!response) response = '';
+            if (!response) response = "";
 
             try {
                 this.kletterbox.setInformation(DataLoader.extractKletterboxData(response));
@@ -84,7 +85,7 @@ export default class DataLoader {
 
 
     private static extractKletterboxData(data: string): number {
-        const startRegex = new RegExp(`<span data-value="`, 'g');
+        const startRegex = new RegExp(`<span data-value="`, "g");
 
         const startMatchOne: RegExpExecArray = startRegex.exec(data);
         const startIndexOne: number = startMatchOne.index + startMatchOne[0].length;
@@ -92,7 +93,7 @@ export default class DataLoader {
         const startMatchTwo: RegExpExecArray = startRegex.exec(data);
         const startIndexTwo: number = startMatchTwo.index + startMatchTwo[0].length;
 
-        const endRegex = new RegExp('">[0-9]*</span>', 'g');
+        const endRegex = new RegExp("\">[0-9]*</span>", "g");
         const endIndexOne: number = endRegex.exec(data).index;
         const endIndexTwo: number = endRegex.exec(data).index;
 
@@ -104,8 +105,8 @@ export default class DataLoader {
 
 function getFormattedDate(): string {
     const currentDate = new Date();
-    let formatted_date = currentDate.getDate() + '.' + (currentDate.getMonth() + 1) + '.' + currentDate.getFullYear() + ' ';
-    formatted_date += currentDate.getHours() + ':' + currentDate.getMinutes();
+    let formatted_date = currentDate.getDate() + "." + (currentDate.getMonth() + 1) + "." + currentDate.getFullYear() + " ";
+    formatted_date += currentDate.getHours() + ":" + currentDate.getMinutes();
     return formatted_date;
 }
 

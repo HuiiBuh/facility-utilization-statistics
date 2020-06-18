@@ -1,9 +1,12 @@
-import * as fs from 'fs';
-import {sleep} from './DataLoader';
+import * as fs from "fs";
+import * as tv4 from "tv4";
 
-type day = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'
+import {sleep} from "./DataLoader";
+import jsonSchema from "./schema.json";
 
-interface IStorageAccessKeys {
+type day = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday"
+
+export interface IStorageAccessKeys {
     day: day;
     year: number;
     week: number;
@@ -21,13 +24,8 @@ export interface IDataObject {
     valueCount: number
 }
 
-const dayList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
-
 type Hour = Array<IHour>;
-type Week = {
-    data: Record<typeof dayList[number], Hour>
-    maxPersonCount: number
-}
+type Week = { data: Record<day, Hour>, maxPersonCount: number }
 type Year = Array<Week>;
 export type DataType = Record<number, Year>;
 
@@ -41,6 +39,7 @@ export default class DataStorage {
     private _data: DataType = {};
     private _saveData = false;
 
+    public JSONSchema = jsonSchema;
     public saveInterval = 5 * 60 * 1000;
     public maxPersonCount: number;
 
@@ -49,9 +48,16 @@ export default class DataStorage {
      * @param maxPersonCount The maximal person count the percentage refers to. Will be updated weekly
      * @param fileName The filename the data will be saved
      */
-    constructor(maxPersonCount: number, fileName = 'data.json') {
+    constructor(maxPersonCount: number, fileName = "data.json") {
         this.fileName = fileName;
         this.maxPersonCount = maxPersonCount;
+
+
+    }
+
+    public validateJSON(json: DataType): void {
+        const value = tv4.validate(json, this.JSONSchema);
+        if (value === false) throw Error(JSON.stringify(tv4.error));
     }
 
     /**
@@ -87,10 +93,15 @@ export default class DataStorage {
 
     get data(): DataType {
         return this._data;
-
     }
 
+    /**
+     * Set new data in the database
+     * @param value The new value
+     * @throws Error if data structure is not valid
+     */
     set data(value: DataType) {
+        this.validateJSON(value);
         this._data = value;
     }
 
@@ -106,7 +117,14 @@ export default class DataStorage {
                     reject(err);
                     return;
                 }
-                this._data = JSON.parse(data.toString('utf8'));
+                const fileData = JSON.parse(data.toString("utf8"));
+                try {
+                    this.validateJSON(fileData);
+                } catch (e) {
+                    reject(e);
+                }
+
+                this._data = fileData;
                 resolve();
             });
         });
@@ -126,8 +144,11 @@ export default class DataStorage {
     /**
      * Merge existing data in the current database
      * @param database The database which should be merged
+     * @throws Error if data structure is not valid
      */
     public mergeDataBases(database: DataType): void {
+        // Validate the database schema
+        this.validateJSON(database);
 
         // For each year
         for (const year in database) {
@@ -244,7 +265,7 @@ export default class DataStorage {
     private initDays(keys: IStorageAccessKeys): void {
         const {year, week} = keys;
 
-        const weekObject: Record<typeof dayList[number], Hour> = this._data[year][week].data;
+        const weekObject: Record<day, Hour> = this._data[year][week].data;
         for (const day in weekObject) {
             if (!weekObject.hasOwnProperty(day)) continue;
 
@@ -269,7 +290,7 @@ export default class DataStorage {
      */
     public static getJSONKeys(currentDate = new Date()): IStorageAccessKeys {
         return {
-            day: currentDate.toLocaleString('en-us', {weekday: 'long'}) as day,
+            day: currentDate.toLocaleString("en-us", {weekday: "long"}) as day,
             year: currentDate.getFullYear(),
             week: DataStorage.getWeek() - 1,
             hour: currentDate.getHours(),

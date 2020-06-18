@@ -73,3 +73,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
   Nest is [MIT licensed](LICENSE).
+
+# Installations
++ https://www.npmjs.com/package/@types/tv4 --dev
++ https://www.npmjs.com/package/tv4
