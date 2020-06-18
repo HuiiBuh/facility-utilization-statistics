@@ -12,8 +12,8 @@ export default class DataLoader {
 
 
     public async loadDataFromFile(): Promise<void> {
-        await this.bloeckle.loadFromFile().catch(() => console.log('Could not load the bloeckle'));
-        await this.kletterbox.loadFromFile().catch(() => console.log('Could not load the kletterbox'));
+        await this.bloeckle.loadFromFile().catch(() => console.log('Could not load the bloeckle database.'));
+        await this.kletterbox.loadFromFile().catch(() => console.log('Could not load the kletterbox database.'));
     }
 
     public startSaveDaemon(): void {
@@ -62,7 +62,6 @@ export default class DataLoader {
         const endIndex = endMatch.index;
 
         const percentage: string = data.slice(startIndex, endIndex);
-        console.log('Bloeckle: ', getFormattedDate() + ' - ', percentage);
         return parseFloat(percentage);
     }
 
@@ -99,9 +98,7 @@ export default class DataLoader {
 
         const blocked: number = parseFloat(data.slice(startIndexOne, endIndexOne));
         const free: number = parseFloat(data.slice(startIndexTwo, endIndexTwo));
-        const percentage: number = (blocked / (blocked + free)) * 100;
-        console.log('Kletterbox: ', getFormattedDate() + ' - ' + percentage);
-        return percentage;
+        return (blocked / (blocked + free)) * 100;
     }
 }
 

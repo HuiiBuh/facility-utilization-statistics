@@ -1,8 +1,10 @@
 import * as fs from 'fs';
 import {sleep} from './DataLoader';
 
-interface StorageAccessKeys {
-    day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+type day = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'
+
+interface IStorageAccessKeys {
+    day: day;
     year: number;
     week: number;
     hour: number;
@@ -122,11 +124,61 @@ export default class DataStorage {
     }
 
     /**
+     * Merge existing data in the current database
+     * @param database The database which should be merged
+     */
+    public mergeDataBases(database: DataType): void {
+
+        // For each year
+        for (const year in database) {
+            if (!database.hasOwnProperty(year)) continue;
+            const yearObject: Week[] = database[year];
+
+            // For each week
+            for (const week in yearObject) {
+                if (!yearObject[week]) continue;
+
+                const weekObject = yearObject[week].data;
+
+                // For each day
+                for (const day in weekObject) {
+                    if (!weekObject.hasOwnProperty(day)) continue;
+                    const dayObject: IHour[] = weekObject[day];
+
+                    // For each hour
+                    for (const hour in dayObject) {
+                        const hourObject: IHour = dayObject[hour];
+
+                        const keys: IStorageAccessKeys = {
+                            year: parseInt(year),
+                            week: parseInt(week),
+                            day: day as day,
+                            hour: parseInt(hour),
+                            firstHalf: true,
+                        };
+
+                        // Insert the data in the database
+                        if (hourObject.firstHalf.valueCount !== 0) {
+                            this.setInformation(hourObject.firstHalf.value, hourObject.firstHalf.valueCount, keys);
+                        }
+                        if (hourObject.secondHalf.valueCount !== 0) {
+                            keys.firstHalf = false;
+                            this.setInformation(hourObject.secondHalf.value, hourObject.secondHalf.valueCount, keys);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
      * Set the information for a specific time
      * @param data The utilization
+     * @param dataWeight The weight the data has (if it is one data point it is 1 if two combined in one 2, ...)
      * @param keys The keys which lead to the time
      */
-    public setInformation(data: number, keys: StorageAccessKeys = DataStorage.getJSONKeys()): void {
+    public setInformation(data: number, dataWeight: number = 1, keys: IStorageAccessKeys = DataStorage.getJSONKeys()): void {
 
         // Extract the variables out of the object
         const {year, week, day, hour, firstHalf} = keys;
@@ -139,7 +191,7 @@ export default class DataStorage {
             this.initWeeks(keys);
         }
 
-        if (!this._data[year][week][day]) {
+        if (!this._data[year][week].data[day]) {
             this.initDays(keys);
         }
 
@@ -147,20 +199,15 @@ export default class DataStorage {
         if (firstHalf) dataObject = this._data[year][week].data[day][hour].firstHalf;
         else dataObject = this._data[year][week].data[day][hour].secondHalf;
 
-        let valueCount: number = dataObject.valueCount;
-        dataObject.valueCount = ++valueCount;
-
-        let value = dataObject.value;
-        value = value * (valueCount - 1) / valueCount;
-        value += data / valueCount;
-        dataObject.value = value;
+        dataObject.value = (dataObject.value * dataObject.valueCount + data * dataWeight) / (dataObject.valueCount + dataWeight);
+        dataObject.valueCount += dataWeight;
     }
 
     /**
      * Init the year
      * @param keys Keys which specify what year, week, ...
      */
-    private initYear(keys: StorageAccessKeys): void {
+    private initYear(keys: IStorageAccessKeys): void {
         this._data[keys.year] = new Array<Week>(52);
 
         this.initWeeks(keys);
@@ -170,7 +217,7 @@ export default class DataStorage {
      * Init the week
      * @param keys Keys which specify what year, week, ...
      * */
-    private initWeeks(keys: StorageAccessKeys): void {
+    private initWeeks(keys: IStorageAccessKeys): void {
         const {year, week} = keys;
 
         // Initialize the week which should be used
@@ -194,7 +241,7 @@ export default class DataStorage {
      * Init the days of a week
      * @param keys Keys which specify what year, week, ...
      */
-    private initDays(keys: StorageAccessKeys): void {
+    private initDays(keys: IStorageAccessKeys): void {
         const {year, week} = keys;
 
         const weekObject: Record<typeof dayList[number], Hour> = this._data[year][week].data;
@@ -220,11 +267,11 @@ export default class DataStorage {
     /**
      * Get the json access keys to data for the current time
      */
-    public static getJSONKeys(currentDate = new Date()): StorageAccessKeys {
+    public static getJSONKeys(currentDate = new Date()): IStorageAccessKeys {
         return {
-            day: currentDate.toLocaleString('en-us', {weekday: 'long'}) as 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday',
+            day: currentDate.toLocaleString('en-us', {weekday: 'long'}) as day,
             year: currentDate.getFullYear(),
-            week: DataStorage.getWeek(),
+            week: DataStorage.getWeek() - 1,
             hour: currentDate.getHours(),
             firstHalf: currentDate.getMinutes() < 30
         };
