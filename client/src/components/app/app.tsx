@@ -7,7 +7,6 @@ import {Bar, Graph} from "../";
 function App() {
     return (
         <div>
-            <p>Hello World</p>
             <Graph/>
             <Bar/>
         </div>
