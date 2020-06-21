@@ -4,10 +4,58 @@ import * as chartjs from "chart.js";
 
 import "./bar.scss";
 
-class Bar extends Component {
-    state: any;
 
-    private data: chartjs.ChartData = {
+class Bar extends Component {
+
+    state: chartjs.ChartOptions = {};
+    props!: { data: number[] };
+
+    private readonly chartOptions: chartjs.ChartOptions = {
+        maintainAspectRatio: false,
+        legend: {
+            display: false
+        },
+        tooltips: {
+            position: "nearest",
+        },
+        layout: {
+            // padding: 25
+        },
+
+        responsive: true,
+        scales: {
+            yAxes: [{
+                scaleLabel: {
+                    labelString: "Personenanzahl",
+                    display: true,
+                },
+                id: "Counter",
+                display: true,
+                ticks: {
+                    min: 0,
+                    max: 50,
+                    stepSize: 5
+                }
+            }, {
+                scaleLabel: {
+                    labelString: "Auslastung in %",
+                    display: true,
+                },
+                id: "percent",
+                position: "right",
+                display: true,
+                gridLines: {
+                    display: false,
+                },
+                ticks: {
+                    min: 0,
+                    max: 100,
+                    stepSize: 10
+                }
+            }]
+        }
+    };
+    private static data = {
         labels: ["Auslastung"],
         datasets: [
             {
@@ -18,84 +66,27 @@ class Bar extends Component {
                 borderWidth: 1,
                 hoverBackgroundColor: "rgba(255,99,132,0.4)",
                 hoverBorderColor: "rgba(255,99,132,1)",
-                data: [20],
+                data: [],
                 maxBarThickness: 50,
             }
         ]
     };
 
-    constructor(props: any) {
-        super(props);
-        this.state = this.data;
+    static getDerivedStateFromProps(newProps: any, state: any) {
+        const copy = {...Bar.data};
+        copy.datasets[0].data = newProps.data;
+        return copy;
     }
 
-
     render() {
-
-
-        const options: chartjs.ChartOptions = {
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            },
-            tooltips: {
-                position: "nearest",
-            },
-            layout: {
-                // padding: 25
-            },
-
-            responsive: true,
-            scales: {
-                yAxes: [{
-                    scaleLabel: {
-                        labelString: "Personenanzahl",
-                        display: true,
-                    },
-                    id: "Counter",
-                    display: true,
-                    ticks: {
-                        min: 0,
-                        max: 50,
-                        stepSize: 5
-                    }
-                }, {
-                    scaleLabel: {
-                        labelString: "Auslastung in %",
-                        display: true,
-                    },
-                    id: "percent",
-                    position: "right",
-                    display: true,
-                    gridLines: {
-                        display: false,
-                    },
-                    ticks: {
-                        min: 0,
-                        max: 100,
-                        stepSize: 10
-                    }
-                }]
-            }
-        };
-
         return (
             <div className="center">
                 <h1>Aktuelle Auslastung</h1>
-                <button onClick={this.updateState.bind(this)}>Random number</button>
                 <article className="bar">
-                    <ChartBar data={this.data} options={options}/>
+                    <ChartBar data={Bar.data} options={this.chartOptions}/>
                 </article>
             </div>
         );
-    }
-
-    updateState() {
-        const value = Math.random() * 50;
-        if (this.data.datasets) {
-            this.data.datasets[0].data = [value];
-        }
-        this.setState(this.data);
     }
 }
 

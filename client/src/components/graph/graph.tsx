@@ -3,6 +3,7 @@ import * as chartjs from "chart.js";
 import {Line} from "react-chartjs-2";
 
 class Graph extends Component {
+
     render() {
         const data: chartjs.ChartData = {
             labels: [
