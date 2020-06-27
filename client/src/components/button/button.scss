@@ -1,0 +1,72 @@
+.rounded-button {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  min-width: 150px;
+  margin-right: 1rem;
+}
+
+.rounded-button {
+  button {
+    cursor: pointer;
+    outline: none;
+
+    display: block;
+    margin: 0 auto;
+    padding: 0;
+    min-width: 150px;
+    height: 50px;
+    border-radius: 40px;
+    background: transparent;
+    letter-spacing: 1px;
+    font-size: 18px;
+    font-family: "Montserrat", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-transition: background-color 0.3s, color 0.3s, width 0.3s, border-width 0.3s, border-color 0.3s;
+    transition: background-color 0.3s, color 0.3s, width 0.3s, border-width 0.3s, border-color 0.3s;
+  }
+
+  button:hover, button:focus, .active {
+    color: #fff;
+  }
+
+  span {
+    padding: 0 1rem;
+    transition: opacity 0.3s 0.1s;
+  }
+}
+
+
+.primary {
+  button {
+    border: 2px solid var(--primary);
+    color: var(--primary);
+  }
+
+  button:hover, button:focus, .active {
+    background-color: var(--primary);
+  }
+}
+
+.secondary {
+  button {
+    border: 2px solid var(--secondary);
+    color: var(--secondary);
+  }
+
+  button:hover, button:focus, .active {
+    background-color: var(--secondary);
+  }
+}
+
+
+.warn {
+  button {
+    border: 2px solid var(--warn);
+    color: var(--warn);
+  }
+
+  button:hover, button:focus, .active {
+    background-color: var(--warn);
+  }
+}
