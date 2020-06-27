@@ -15,12 +15,12 @@ class Graph extends Component {
             ],
             datasets: [
                 {
-                    label: "Temperature",
+                    label: "Anzahl Personen",
                     data: [22, 19, 27, 23, 22, 24, 17, 25, 23, 24, 20, 19, 22, 19, 27, 23, 22, 24, 17, 25, 23, 24, 20, 19],
                     fill: true,
                     borderWidth: 2,
-                    backgroundColor: "#36a2eb",
-                    borderColor: "#2d87c4"
+                    backgroundColor: "#2b998a",
+                    borderColor: "#1f7166"
                 }
             ]
         };

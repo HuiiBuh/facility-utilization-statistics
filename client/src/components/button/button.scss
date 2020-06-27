@@ -2,20 +2,28 @@
   position: relative;
   display: inline-block;
   text-align: center;
-  min-width: 150px;
+  min-width: 100px;
   margin-right: 1rem;
 }
 
+
 .rounded-button {
+
+  &.small button {
+    height: 30px;
+  }
+
+  &.small span {
+    padding: 0 .5rem;
+  }
+
   button {
     cursor: pointer;
-    outline: none;
-
     display: block;
     margin: 0 auto;
     padding: 0;
-    min-width: 150px;
-    height: 50px;
+    min-width: 100px;
+    height: 40px;
     border-radius: 40px;
     background: transparent;
     letter-spacing: 1px;
@@ -26,16 +34,16 @@
     transition: background-color 0.3s, color 0.3s, width 0.3s, border-width 0.3s, border-color 0.3s;
   }
 
-  button:hover, button:focus, .active {
-    color: #fff;
-  }
-
   span {
     padding: 0 1rem;
     transition: opacity 0.3s 0.1s;
   }
-}
 
+  button:hover, button:focus, .active {
+    color: #fff;
+  }
+
+}
 
 .primary {
   button {
@@ -58,7 +66,6 @@
     background-color: var(--secondary);
   }
 }
-
 
 .warn {
   button {

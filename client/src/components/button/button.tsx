@@ -5,7 +5,8 @@ interface Props {
     onClick?: () => void;
     children?: HTMLElement | string
     type?: "primary" | "secondary" | "warn"
-    active?: boolean
+    isActive?: boolean
+    isSmall?: boolean
 }
 
 export default class Button extends React.Component {
@@ -27,13 +28,16 @@ export default class Button extends React.Component {
 
         let className = "rounded-button ";
         if (this.props.type) className += this.props.type;
+        else className += "primary";
+
+        if (this.props.isSmall) className += ` small`;
 
         return (
-            <div onClick={this.props.onClick} onKeyPress={this.onEnter} className={className}>
-                <button className={this.props.active ? "active" : ""}>
+            <span onClick={this.props.onClick} onKeyPress={this.onEnter} className={className}>
+                <button className={this.props.isActive ? "active" : ""}>
                     <span>{this.props.children}</span>
                 </button>
-            </div>
+            </span>
 
         );
     }

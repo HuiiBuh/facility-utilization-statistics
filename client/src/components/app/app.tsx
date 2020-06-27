@@ -1,7 +1,7 @@
 import React from "react";
 
 import "./app.scss";
-import {Graph, Utilization, RoundButton} from "../";
+import Structure from "../structure/structure";
 
 
 class App extends React.Component {
@@ -17,21 +17,8 @@ class App extends React.Component {
     };
 
     render() {
-        return (
-            <div style={{marginTop: "1rem"}}>
-
-                <RoundButton type="primary" active={true}>Ich</RoundButton>
-                <RoundButton type="secondary">liebeeeeeeeeeeeee</RoundButton>
-                <RoundButton type="warn">Sarah</RoundButton>
-
-                {/*<button onClick={this.updateCurrentUtilization}>Update current</button>*/}
-                {/*<Graph/>*/}
-                {/*<Utilization data={this.state.currentUtilization} maxCount={this.state.maxCount}/>*/}
-            </div>
-        );
+        return (<Structure/>);
     }
 }
 
 export default App;
-
-// Year Month Estimation Today

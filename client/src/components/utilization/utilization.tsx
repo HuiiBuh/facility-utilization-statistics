@@ -19,16 +19,21 @@ export default class Utilization extends Component {
                 {
                     label: 'Personen',
                     yAxisID: 'Counter',
-                    backgroundColor: 'rgba(255,99,132,0.2)',
-                    borderColor: 'rgba(255,99,132,1)',
+                    backgroundColor: 'rgb(255,153,0)',
+                    hoverBackgroundColor: 'rgb(255,153,0)',
+                    borderColor: 'rgb(236,134,9)',
+                    hoverBorderColor: 'rgb(236,134,9)',
                     borderWidth: 1,
-                    hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-                    hoverBorderColor: 'rgba(255,99,132,1)',
                     data: [0],
                     maxBarThickness: 50,
                 }
             ]
         },
+
+        // RED rgb(205,65,65) rgb(205,65,36)
+        // GREEN rgb(129,191,46) rgb(99,154,26)
+        // ORANGE rgb(255,153,0) rgb(236,134,9)
+
         options: {
             maintainAspectRatio: false,
             legend: {
@@ -90,7 +95,6 @@ export default class Utilization extends Component {
         console.log(this.state);
         return (
             <div className="center">
-                <h1>Aktuelle Auslastung</h1>
                 <article className="bar">
                     <ChartBar data={this.state.data} options={this.state.options}/>
                 </article>
