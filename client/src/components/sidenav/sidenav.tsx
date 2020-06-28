@@ -14,10 +14,10 @@ export default class Sidenav extends React.Component {
 
             <hr className="divider"/>
 
-            <NavLink to="/blöckle" className="menu-entry" activeClassName="nav-active">
+            <NavLink to="/facility/blöckle" className="menu-entry" activeClassName="nav-active">
                 <h2>Blöckle</h2>
             </NavLink>
-            <NavLink to="kletterbox" className="menu-entry" activeClassName="nav-active">
+            <NavLink to="/facility/kletterbox" className="menu-entry" activeClassName="nav-active">
                 <h2>Kletterbox</h2>
             </NavLink>
 

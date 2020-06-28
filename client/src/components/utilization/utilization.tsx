@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
-import {Bar as ChartBar} from 'react-chartjs-2';
-import * as chartjs from 'chart.js';
+import React, {Component} from "react";
+import {Bar as ChartBar} from "react-chartjs-2";
+import * as chartjs from "chart.js";
 
-import './utilization.scss';
+import "./utilization.scss";
 
 interface Props {
     data: number;
@@ -14,15 +14,15 @@ export default class Utilization extends Component {
     private static data = {
 
         data: {
-            labels: ['Auslastung'],
+            labels: ["Auslastung"],
             datasets: [
                 {
-                    label: 'Personen',
-                    yAxisID: 'Counter',
-                    backgroundColor: 'rgb(255,153,0)',
-                    hoverBackgroundColor: 'rgb(255,153,0)',
-                    borderColor: 'rgb(236,134,9)',
-                    hoverBorderColor: 'rgb(236,134,9)',
+                    label: "Personen",
+                    yAxisID: "Counter",
+                    backgroundColor: "rgb(255,153,0)",
+                    hoverBackgroundColor: "rgb(255,153,0)",
+                    borderColor: "rgb(236,134,9)",
+                    hoverBorderColor: "rgb(236,134,9)",
                     borderWidth: 1,
                     data: [0],
                     maxBarThickness: 50,
@@ -40,7 +40,7 @@ export default class Utilization extends Component {
                 display: false
             },
             tooltips: {
-                position: 'nearest',
+                position: "nearest",
             },
             layout: {
                 // padding: 25
@@ -50,10 +50,10 @@ export default class Utilization extends Component {
             scales: {
                 yAxes: [{
                     scaleLabel: {
-                        labelString: 'Personenanzahl',
+                        labelString: "Personenanzahl",
                         display: true,
                     },
-                    id: 'Counter',
+                    id: "Counter",
                     display: true,
                     ticks: {
                         min: 0,
@@ -62,11 +62,11 @@ export default class Utilization extends Component {
                     }
                 }, {
                     scaleLabel: {
-                        labelString: 'Auslastung in %',
+                        labelString: "Auslastung in %",
                         display: true,
                     },
-                    id: 'percent',
-                    position: 'right',
+                    id: "percent",
+                    position: "right",
                     display: true,
                     gridLines: {
                         display: false,
@@ -92,7 +92,6 @@ export default class Utilization extends Component {
     }
 
     render() {
-        console.log(this.state);
         return (
             <div className="center">
                 <article className="bar">

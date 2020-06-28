@@ -3,7 +3,7 @@ import {Switch, Route} from "react-router-dom";
 
 import "./app.scss";
 import Sidenav from "../sidenav/sidenav";
-import {Admin, Credits, Diagrams} from "../index";
+import {Admin, Credits, Facility} from "../index";
 
 
 class App extends React.Component {
@@ -28,17 +28,17 @@ class App extends React.Component {
                     {/*<span className="close">&#43;</span>*/}
 
                     <Switch>
-                        <Route path="/diagram">
-                            <Diagrams/>
+                        <Route path="/facility/:id" render={({match}) => (
+                            <Facility id={match.params.id}/>)}>
                         </Route>
-                        <Route path="/credits">
+                        <Route exact path="/credits">
                             <Credits/>
                         </Route>
-                        <Route path="/admin">
+                        <Route exact path="/admin">
                             <Admin/>
                         </Route>
                         <Route path="/">
-                            <h1>Nothing selected</h1>
+                            <h1 className="text-center">Nothing found</h1>
                         </Route>
                     </Switch>
 
