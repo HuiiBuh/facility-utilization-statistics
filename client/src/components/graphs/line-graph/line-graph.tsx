@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import * as chartjs from "chart.js";
 import {Line} from "react-chartjs-2";
 
-class Graph extends Component {
+class LineGraph extends Component {
 
     render() {
         const data: chartjs.ChartData = {
@@ -40,4 +40,4 @@ class Graph extends Component {
     }
 }
 
-export default Graph;
+export default LineGraph;

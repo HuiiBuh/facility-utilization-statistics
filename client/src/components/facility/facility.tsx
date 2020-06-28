@@ -2,7 +2,8 @@ import React from "react";
 import {RoundButton} from "../index";
 
 import "./facility.scss";
-import {Link, NavLink, Switch, Route} from "react-router-dom";
+import {NavLink, Switch, Route} from "react-router-dom";
+import {BarGraph} from "../graphs";
 
 interface IsActive {
     isExact: boolean
@@ -63,7 +64,7 @@ export default class Facility extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className="full-height">
 
                 <div className="header">
                     <h1>{this.props.id.charAt(0).toUpperCase() + this.props.id.slice(1)}</h1>
@@ -103,7 +104,7 @@ export default class Facility extends React.Component {
 
                     <Switch>
                         <Route path={`/facility/${this.props.id}`} exact>
-                            current
+                            <BarGraph data={20} maxCount={40}/>
                         </Route>
                         <Route path={`/facility/${this.props.id}/expected`} exact>
                             expected
@@ -122,5 +123,3 @@ export default class Facility extends React.Component {
         );
     }
 }
-// {/*<Utilization data={20} maxCount={40}/>*/}
-// {/*<Graph/>*/}

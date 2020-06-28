@@ -2,14 +2,14 @@ import React, {Component} from "react";
 import {Bar as ChartBar} from "react-chartjs-2";
 import * as chartjs from "chart.js";
 
-import "./utilization.scss";
+import "./bar-graph.scss";
 
 interface Props {
     data: number;
     maxCount: number
 }
 
-export default class Utilization extends Component {
+export default class BarGraph extends Component {
 
     private static data = {
 
@@ -85,7 +85,7 @@ export default class Utilization extends Component {
     props!: Props;
 
     static getDerivedStateFromProps(newProps: Props, _: any) {
-        const copy = {...Utilization.data};
+        const copy = {...BarGraph.data};
         copy.data.datasets[0].data = [newProps.data];
         copy.options.scales.yAxes[0].ticks.max = newProps.maxCount;
         return copy;
