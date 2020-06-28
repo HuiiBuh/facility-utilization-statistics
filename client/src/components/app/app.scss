@@ -1,0 +1,64 @@
+$navbar-height: 60px;
+$left-width: 300px;
+
+.fullscreen {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+
+  .header, .left, {
+    overflow: hidden;
+  }
+}
+
+
+.right {
+  position: relative;
+  height: 100vh;
+  width: calc(100vw - #{$left-width});
+}
+
+.header {
+  text-align: center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: $navbar-height;
+  width: calc(100vw - #{$left-width});
+
+  position: relative;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+
+
+.select-time {
+  display: inline-flex;
+  justify-content: space-between;
+  margin: 1rem 0;
+  min-width: 800px;
+}
+
+@media (max-width: 1200px) {
+  .select-time {
+    min-width: unset;
+  }
+}
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.close {
+  font-size: xx-large;
+  cursor: pointer;
+  z-index: 1;
+  position: absolute;
+  left: 0;
+}

@@ -10,6 +10,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+// Disable unwanted properties
+*::-moz-focus-inner, * {
+  border: 0;
+  outline: none;
+}
+
+:root {
+  --primary: #2b998a;
+  --secondary: #09505a;
+  --secondary-light-1: rgba(9, 80, 90, 0.1);
+  --secondary-light-2: rgba(9, 80, 90, 0.03);
+  --warn: #f69217
+}
+
+a {
+  text-decoration: none;
+}
+
+// Headings
 h1, h2, h3, h4, h5, h6, {
   margin: 0 0 20px 0;
   font-family: ProximaNova, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -18,16 +37,7 @@ h1, h2, h3, h4, h5, h6, {
   text-transform: none;
 }
 
-h1 {
-  font-size: 32.3px;
-  line-height: 1.2;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-  monospace;
-}
-
+// Useful classes
 .text-center {
   text-align: center;
 }
@@ -41,14 +51,17 @@ code {
   border-top: 1px solid #e5e5e5;
 }
 
-*::-moz-focus-inner, * {
-  border: 0;
-  outline: none;
-}
+// Input
 
+input {
+  box-sizing: border-box;
+  padding: 0 .5rem;
+  width: 100%;
+  border-radius: 5px;
+  height: 30px;
+  border: solid var(--secondary) 1px;
 
-:root {
-  --primary: #2b998a;
-  --secondary: #09505a;
-  --warn: #f69217
+  &:focus {
+    box-shadow: 0 0 0 .2rem var(--secondary-light-1);
+  }
 }

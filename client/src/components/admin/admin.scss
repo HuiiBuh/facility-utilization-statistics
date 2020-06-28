@@ -1,0 +1,53 @@
+.admin-box {
+  width: 75%;
+  max-width: 600px;
+  display: inline-block;
+
+  * {
+    margin-bottom: .5rem;
+  }
+}
+
+.file-upload-rectangle {
+  position: relative;
+  display: inline-block;
+  height: 200px;
+  border-radius: 10px;
+  width: 100%;
+
+  border: 1px var(--primary) dashed;
+  transition: background-color ease-in-out .1s;
+  background-color: transparent;
+
+  &:hover {
+    background-color: var(--secondary-light-2);
+  }
+}
+
+.upload-text {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.upload-icon {
+  color: var(--primary);
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+
+  font-size: 5rem;
+  transition: font-size .1s ease-in-out;
+}
+
+#browse-files {
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.upload-button {
+  float: right;
+  margin-right: 0;
+}

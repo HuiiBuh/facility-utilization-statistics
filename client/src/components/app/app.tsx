@@ -1,7 +1,9 @@
 import React from "react";
+import {Switch, Route} from "react-router-dom";
 
 import "./app.scss";
-import Structure from "../structure/structure";
+import Sidenav from "../sidenav/sidenav";
+import {Admin, Credits, Diagrams} from "../index";
 
 
 class App extends React.Component {
@@ -17,7 +19,33 @@ class App extends React.Component {
     };
 
     render() {
-        return (<Structure/>);
+        return (
+            <div className="fullscreen flex">
+
+                <Sidenav/>
+
+                <div className="right">
+                    {/*<span className="close">&#43;</span>*/}
+
+                    <Switch>
+                        <Route path="/diagram">
+                            <Diagrams/>
+                        </Route>
+                        <Route path="/credits">
+                            <Credits/>
+                        </Route>
+                        <Route path="/admin">
+                            <Admin/>
+                        </Route>
+                        <Route path="/">
+                            <h1>Nothing selected</h1>
+                        </Route>
+                    </Switch>
+
+                </div>
+
+            </div>
+        );
     }
 }
 

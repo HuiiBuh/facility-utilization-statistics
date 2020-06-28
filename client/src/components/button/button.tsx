@@ -7,6 +7,7 @@ interface Props {
     type?: "primary" | "secondary" | "warn"
     isActive?: boolean
     isSmall?: boolean
+    class?: string
 }
 
 export default class Button extends React.Component {
@@ -30,7 +31,8 @@ export default class Button extends React.Component {
         if (this.props.type) className += this.props.type;
         else className += "primary";
 
-        if (this.props.isSmall) className += ` small`;
+        if (this.props.isSmall) className += " small";
+        if (this.props.class) className += ` ${this.props.class}`;
 
         return (
             <span onClick={this.props.onClick} onKeyPress={this.onEnter} className={className}>
