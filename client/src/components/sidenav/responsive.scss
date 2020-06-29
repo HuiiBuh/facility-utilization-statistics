@@ -1,0 +1,71 @@
+.nav-overlay {
+  position: fixed;
+  display: none;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+
+@media (max-width: 2000px) {
+  .right {
+    width: 100%;
+  }
+
+  .left {
+    z-index: 100;
+    position: absolute;
+    transform: translateX(-100%);
+    transition: transform ease-in-out .5s;
+  }
+
+  .show-menu {
+    .left {
+      transform: translateX(0);
+    }
+
+    .nav-overlay {
+      animation: fade-in 1s forwards;
+      display: block;
+    }
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .navbar-icon {
+    border: dotted 1px transparent;
+
+    position: fixed;
+    padding: 5px;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    z-index: 10;
+
+    &:focus {
+      border: dotted 1px gray;
+      border-radius: 10px;
+    }
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    display: none;
+  }
+
+  1% {
+    display: block;
+  }
+
+  100% {
+    opacity: 1;
+    display: block;
+  }
+}

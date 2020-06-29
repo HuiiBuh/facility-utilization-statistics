@@ -1,5 +1,5 @@
 import React from "react";
-import {Switch, Route} from "react-router-dom";
+import {Route, Switch} from "react-router-dom";
 
 import "./app.scss";
 import Sidenav from "../sidenav/sidenav";
@@ -19,13 +19,13 @@ class App extends React.Component {
     };
 
     render() {
+
         return (
             <div className="fullscreen flex">
 
                 <Sidenav/>
 
                 <div className="right">
-                    {/*<span className="close">&#43;</span>*/}
 
                     <Switch>
                         <Route path="/facility/:id" render={({match}) => (
@@ -36,6 +36,9 @@ class App extends React.Component {
                         </Route>
                         <Route exact path="/admin">
                             <Admin/>
+                        </Route>
+                        <Route path="/" exact>
+                            <h1 className="text-center">Wähle eine Einrichtung</h1>
                         </Route>
                         <Route path="/">
                             <h1 className="text-center">Nothing found</h1>

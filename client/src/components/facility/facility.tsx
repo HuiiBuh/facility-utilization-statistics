@@ -2,7 +2,7 @@ import React from "react";
 import {RoundButton} from "../index";
 
 import "./facility.scss";
-import {NavLink, Switch, Route} from "react-router-dom";
+import {NavLink, Route, Switch} from "react-router-dom";
 import {BarGraph} from "../graphs";
 
 interface IsActive {
@@ -26,41 +26,39 @@ interface State {
 
 export default class Facility extends React.Component {
 
-    props: Props = {
-        id: "null"
-    };
+    props: Props;
 
     state: State = {
-        current: false,
+        current: true,
         expected: false,
         month: false,
         year: false
     };
 
-    active(key: "current" | "expected" | "month" | "year"): any {
-
-        return (params: any): boolean => {
-            if (!params) return false;
-
-            const parameters: IsActive = params;
-
-            const regex: RegExp = new RegExp(parameters.path);
-            const match: boolean = regex.test(parameters.url);
-
-            if (this.state[key] !== match) {
-                const stateUpdate: State = {
-                    current: false,
-                    expected: false,
-                    month: false,
-                    year: false
-                };
-                stateUpdate[key] = match;
-                this.setState(stateUpdate);
-            }
-
-            return match;
-        };
+    constructor(props: any) {
+        super(props);
+        this.props = props;
     }
+
+    updateActiveButton = (key: "current" | "expected" | "month" | "year") => {
+        return (): void => {
+            const stateUpdate: State = {
+                current: false,
+                expected: false,
+                month: false,
+                year: false
+            };
+            stateUpdate[key] = true;
+            this.setState(stateUpdate);
+        };
+    };
+
+    onEnter = (key: "current" | "expected" | "month" | "year"): (event: React.KeyboardEvent<HTMLAnchorElement>) => void => {
+        return (event: React.KeyboardEvent<HTMLAnchorElement>): void => {
+            event.key === "Enter" && this.updateActiveButton(key)();
+        };
+    };
+
 
     render() {
         return (
@@ -73,25 +71,35 @@ export default class Facility extends React.Component {
                 <div className="text-center">
                     <div className="select-time">
 
-                        <NavLink to={`/facility/${this.props.id}`} isActive={this.active("current")} exact>
+                        <NavLink to={`/facility/${this.props.id}`} exact tabIndex={-1}
+                                 onClick={this.updateActiveButton("current")}
+                                 onKeyPress={this.onEnter("current")}
+                        >
                             <RoundButton isSmall={true}
                                          type={this.state.current ? "primary" : "secondary"}
                                          isActive={this.state.current}>Aktuell</RoundButton>
                         </NavLink>
 
-                        <NavLink to={`/facility/${this.props.id}/expected`} isActive={this.active("expected")}>
+                        <NavLink to={`/facility/${this.props.id}/expected`} tabIndex={-1}
+                                 onClick={this.updateActiveButton("expected")}
+                                 onKeyPress={this.onEnter("expected")}
+                        >
                             <RoundButton isSmall={true}
                                          type={this.state.expected ? "primary" : "secondary"}
                                          isActive={this.state.expected}>Erwartet</RoundButton>
                         </NavLink>
 
-                        <NavLink to={`/facility/${this.props.id}/month`} isActive={this.active("month")}>
+                        <NavLink to={`/facility/${this.props.id}/month`} tabIndex={-1}
+                                 onClick={this.updateActiveButton("month")}
+                                 onKeyPress={this.onEnter("month")}>
                             <RoundButton isSmall={true}
                                          type={this.state.month ? "primary" : "secondary"}
                                          isActive={this.state.month}>Monat</RoundButton>
                         </NavLink>
 
-                        <NavLink to={`/facility/${this.props.id}/year`} isActive={this.active("year")}>
+                        <NavLink to={`/facility/${this.props.id}/year`} tabIndex={-1}
+                                 onClick={this.updateActiveButton("year")}
+                                 onKeyPress={this.onEnter("year")}>
                             <RoundButton isSmall={true}
                                          type={this.state.year ? "primary" : "secondary"}
                                          isActive={this.state.year}>Jahr</RoundButton>

@@ -1,20 +1,21 @@
 $left-width: 300px;
 
-
 .left {
   position: relative;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   height: 100vh;
   width: $left-width;
 }
 
 .sidenav {
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  height: 100vh;
+  position: absolute;
+  z-index: 100;
 
   .nav-active.menu-entry > h2 {
     background-color: rgba(0, 0, 0, 0.05);
   }
 }
-
 
 .menu-entry {
 
@@ -47,3 +48,4 @@ $left-width: 300px;
   transform: scaleX(-1);
 }
 
+@import "./responsive.scss";
