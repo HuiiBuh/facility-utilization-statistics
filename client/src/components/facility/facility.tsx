@@ -20,6 +20,7 @@ interface State {
 
     current: boolean
     expected: boolean
+    today: boolean
     month: boolean
     year: boolean
 }
@@ -30,6 +31,7 @@ export default class Facility extends React.Component {
 
     state: State = {
         current: true,
+        today: false,
         expected: false,
         month: false,
         year: false
@@ -40,10 +42,20 @@ export default class Facility extends React.Component {
         this.props = props;
     }
 
-    updateActiveButton = (key: "current" | "expected" | "month" | "year") => {
+    componentDidMount(): void {
+        const path = window.location.pathname.split("/").pop() as "current" | "expected" | "month" | "year" | "today";
+
+        if (path in this.state) {
+            this.updateActiveButton(path)();
+        }
+    }
+
+
+    updateActiveButton = (key: "current" | "expected" | "month" | "year" | "today") => {
         return (): void => {
             const stateUpdate: State = {
                 current: false,
+                today: false,
                 expected: false,
                 month: false,
                 year: false
@@ -53,7 +65,7 @@ export default class Facility extends React.Component {
         };
     };
 
-    onEnter = (key: "current" | "expected" | "month" | "year"): (event: React.KeyboardEvent<HTMLAnchorElement>) => void => {
+    onEnter = (key: "current" | "expected" | "month" | "year" | "today"): (event: React.KeyboardEvent<HTMLAnchorElement>) => void => {
         return (event: React.KeyboardEvent<HTMLAnchorElement>): void => {
             event.key === "Enter" && this.updateActiveButton(key)();
         };
@@ -71,19 +83,25 @@ export default class Facility extends React.Component {
                 <div className="text-center">
                     <div className="select-time">
 
-                        <NavLink to={`/facility/${this.props.id}`} exact tabIndex={-1}
+                        <NavLink to={`/facility/${this.props.id}/current`} exact tabIndex={-1}
                                  onClick={this.updateActiveButton("current")}
-                                 onKeyPress={this.onEnter("current")}
-                        >
+                                 onKeyPress={this.onEnter("current")}>
                             <RoundButton isSmall={true}
                                          type={this.state.current ? "primary" : "secondary"}
                                          isActive={this.state.current}>Aktuell</RoundButton>
                         </NavLink>
 
+                        <NavLink to={`/facility/${this.props.id}/today`} exact tabIndex={-1}
+                                 onClick={this.updateActiveButton("today")}
+                                 onKeyPress={this.onEnter("today")}>
+                            <RoundButton isSmall={true}
+                                         type={this.state.today ? "primary" : "secondary"}
+                                         isActive={this.state.today}>Heute</RoundButton>
+                        </NavLink>
+
                         <NavLink to={`/facility/${this.props.id}/expected`} tabIndex={-1}
                                  onClick={this.updateActiveButton("expected")}
-                                 onKeyPress={this.onEnter("expected")}
-                        >
+                                 onKeyPress={this.onEnter("expected")}>
                             <RoundButton isSmall={true}
                                          type={this.state.expected ? "primary" : "secondary"}
                                          isActive={this.state.expected}>Erwartet</RoundButton>
@@ -100,7 +118,7 @@ export default class Facility extends React.Component {
                         <NavLink to={`/facility/${this.props.id}/year`} tabIndex={-1}
                                  onClick={this.updateActiveButton("year")}
                                  onKeyPress={this.onEnter("year")}>
-                            <RoundButton isSmall={true}
+                            <RoundButton isSmall={true} class="no-margin-right"
                                          type={this.state.year ? "primary" : "secondary"}
                                          isActive={this.state.year}>Jahr</RoundButton>
                         </NavLink>
@@ -111,8 +129,11 @@ export default class Facility extends React.Component {
                 <div className="diagram-outlet">
 
                     <Switch>
-                        <Route path={`/facility/${this.props.id}`} exact>
+                        <Route path={`/facility/${this.props.id}/current`} exact>
                             <BarGraph data={20} maxCount={40}/>
+                        </Route>
+                        <Route path={`/facility/${this.props.id}/today`} exact>
+                            today
                         </Route>
                         <Route path={`/facility/${this.props.id}/expected`} exact>
                             expected
