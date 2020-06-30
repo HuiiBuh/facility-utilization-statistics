@@ -1,40 +1,17 @@
 import * as fs from "fs";
+import {DataType, day, Hour, IDataObject, IHour, IStorageAccessKeys, Week} from "src/storage/stoarge.interfaces";
 import * as tv4 from "tv4";
 
 import {sleep} from "./DataLoader";
-import jsonSchema from "./schema.json";
+import jsonSchema from "src/storage/json.schema";
 
-type day = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday"
-
-export interface IStorageAccessKeys {
-    day: day;
-    year: number;
-    week: number;
-    hour: number;
-    firstHalf: boolean
-}
-
-export interface IHour {
-    firstHalf: IDataObject
-    secondHalf: IDataObject
-}
-
-export interface IDataObject {
-    value: number
-    valueCount: number
-}
-
-type Hour = Array<IHour>;
-type Week = { data: Record<day, Hour>, maxPersonCount: number }
-type Year = Array<Week>;
-export type DataType = Record<number, Year>;
 
 /**
  * An object which handles the updating and storing of the collected data
  */
 export default class DataStorage {
 
-    private readonly fileName: string;
+    private fileName: string;
 
     private _data: DataType = {};
     private _saveData = false;
@@ -43,20 +20,30 @@ export default class DataStorage {
     public saveInterval = 5 * 60 * 1000;
     public maxPersonCount: number;
 
+    public static INSTANCE: DataStorage = null;
+
     /**
      * Create a new DataStorage. To use the autosave feature set saveData to true
      * @param maxPersonCount The maximal person count the percentage refers to. Will be updated weekly
      * @param fileName The filename the data will be saved
      */
     constructor(maxPersonCount: number, fileName = "data.json") {
+
+        if (DataStorage.INSTANCE) {
+            DataStorage.INSTANCE.maxPersonCount = maxPersonCount;
+            return DataStorage.INSTANCE;
+        }
+
         this.fileName = fileName;
         this.maxPersonCount = maxPersonCount;
-
-
     }
 
+    /**
+     * Validate the json scheme
+     * @param json The json
+     */
     public validateJSON(json: DataType): void {
-        const value = tv4.validate(json, this.JSONSchema);
+        const value: boolean = tv4.validate(json, this.JSONSchema);
         if (value === false) throw Error(JSON.stringify(tv4.error));
     }
 
@@ -104,7 +91,6 @@ export default class DataStorage {
         this.validateJSON(value);
         this._data = value;
     }
-
 
     /**
      * Load the data from a file
@@ -191,7 +177,6 @@ export default class DataStorage {
             }
         }
     }
-
 
     /**
      * Set the information for a specific time
@@ -298,11 +283,10 @@ export default class DataStorage {
         };
     }
 
-
     /**
      * Get current week number
      */
-    private static getWeek(date = new Date()): number {
+    public static getWeek(date = new Date()): number {
 
         // Copy the date object so you don't change the original
         date = new Date(date);

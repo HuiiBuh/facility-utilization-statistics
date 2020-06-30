@@ -11,33 +11,63 @@ export default class DataLoader {
     private static kletterboxURL = "https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM";
     public kletterbox = new DataStorage(30, "db/kletterbox.json");
 
+    private crawlingInterval: number;
 
+    /**
+     * The data-loader service
+     * @param crawlingInterval The interval the data gets crawled
+     */
+    constructor(crawlingInterval: number = 2) {
+        this.crawlingInterval = crawlingInterval;
+    }
+
+    /**
+     * Load the databases from the files
+     */
     public async loadDataFromFile(): Promise<void> {
         await this.bloeckle.loadFromFile().catch((e) => console.log("Could not load the bloeckle database.\n", e));
         await this.kletterbox.loadFromFile().catch((e) => console.log("Could not load the kletterbox database.\n", e));
     }
 
+    /**
+     * Start the saving of the data in periodic time periods
+     */
     public startSaveDaemon(): void {
         this.bloeckle.saveData = true;
         this.kletterbox.saveData = true;
     }
 
+    /**
+     * Save the data to the files
+     */
     public async saveAllData(): Promise<void> {
         await this.bloeckle.writeToFile();
         await this.kletterbox.writeToFile();
     }
 
+    /**
+     * End the continuous file saving
+     */
     public endSaveDaemon(): void {
         this.bloeckle.saveData = false;
         this.kletterbox.saveData = false;
     }
 
+    /**
+     * Start the crawling of the data
+     */
     public startCrawlingData(): void {
-        this.loadBloeckleData();
-        this.loadKletterboxData();
+        this.loadBloeckleData().then(() => {
+            console.log("Bloeckle crawling stopped");
+        });
+        this.loadKletterboxData().then(() => {
+            console.log("Kletterbox crawling stopped");
+        });
     }
 
-
+    /**
+     * Load the data from the bloeckle website
+     */
     private async loadBloeckleData(): Promise<void> {
         const apiClient = new ApiClient();
         while (true) {
@@ -53,6 +83,11 @@ export default class DataLoader {
         }
     }
 
+    /**
+     * Extract the data from the blockle website
+     * @param data The crawled data
+     * @returns The blocked percentage
+     */
     private static extractBloeckleData(data: string): number {
         const startRegex = new RegExp(`style='width: *`);
         const startMatch: RegExpExecArray = startRegex.exec(data);
@@ -66,9 +101,10 @@ export default class DataLoader {
         return parseFloat(percentage);
     }
 
-
+    /**
+     * Load the data from the kletterbox website
+     */
     private async loadKletterboxData(): Promise<void> {
-
         const apiClient = new ApiClient();
         while (true) {
             let response: string | void = await apiClient.get(DataLoader.kletterboxURL).catch((error) => console.log(error));
@@ -83,7 +119,11 @@ export default class DataLoader {
         }
     }
 
-
+    /**
+     * Extract the data from the kletterbox website
+     * @param data The crawled data
+     * @returns The blocked percentage
+     */
     private static extractKletterboxData(data: string): number {
         const startRegex = new RegExp(`<span data-value="`, "g");
 
@@ -101,15 +141,13 @@ export default class DataLoader {
         const free: number = parseFloat(data.slice(startIndexTwo, endIndexTwo));
         return (blocked / (blocked + free)) * 100;
     }
+
 }
 
-function getFormattedDate(): string {
-    const currentDate = new Date();
-    let formatted_date = currentDate.getDate() + "." + (currentDate.getMonth() + 1) + "." + currentDate.getFullYear() + " ";
-    formatted_date += currentDate.getHours() + ":" + currentDate.getMinutes();
-    return formatted_date;
-}
-
+/**
+ * Sleep function
+ * @param ms The time the function sleeps
+ */
 export async function sleep(ms: number): Promise<void> {
     return new Promise((resolve => setTimeout(() => resolve(), ms)));
 }
