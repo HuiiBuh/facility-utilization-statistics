@@ -39,13 +39,6 @@ export default class BarGraph extends Component {
             legend: {
                 display: false
             },
-            tooltips: {
-                position: "nearest",
-            },
-            layout: {
-                // padding: 25
-            },
-
             responsive: true,
             scales: {
                 yAxes: [{

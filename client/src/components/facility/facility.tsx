@@ -3,7 +3,7 @@ import {RoundButton} from "../index";
 
 import "./facility.scss";
 import {NavLink, Route, Switch} from "react-router-dom";
-import {BarGraph} from "../graphs";
+import {BarGraph, LineGraph} from "../graphs";
 
 interface IsActive {
     isExact: boolean
@@ -130,19 +130,19 @@ export default class Facility extends React.Component {
 
                     <Switch>
                         <Route path={`/facility/${this.props.id}/current`} exact>
-                            <BarGraph data={20} maxCount={40}/>
+                            <BarGraph data={10} maxCount={50}/>
                         </Route>
                         <Route path={`/facility/${this.props.id}/today`} exact>
-                            today
+                            <LineGraph/>
                         </Route>
                         <Route path={`/facility/${this.props.id}/expected`} exact>
-                            expected
+                            <LineGraph/>
                         </Route>
                         <Route path={`/facility/${this.props.id}/month`} exact>
-                            month
+                            <LineGraph/>
                         </Route>
                         <Route path={`/facility/${this.props.id}/year`} exact>
-                            year
+                            <LineGraph/>
                         </Route>
                     </Switch>
 
