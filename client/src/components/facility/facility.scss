@@ -1,8 +1,12 @@
 .full-height {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .diagram-outlet {
-  margin-top: 1rem;
-  //  TODO fill remaining height
+  flex-grow: 1;
+  align-items: center;
+  display: flex;
+  justify-content: center;
 }

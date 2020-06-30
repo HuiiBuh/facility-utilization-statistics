@@ -11,9 +11,13 @@ body {
 }
 
 // Disable unwanted properties
-*::-moz-focus-inner, * {
+*::-moz-focus-inner {
   border: 0;
-  outline: none;
+}
+
+* {
+  outline: none !important;
+
 }
 
 :root {
@@ -64,4 +68,9 @@ input {
   &:focus {
     box-shadow: 0 0 0 .2rem var(--secondary-light-1);
   }
+}
+
+// Background
+.app-background {
+  background-color: white;
 }
