@@ -10,3 +10,21 @@
   display: flex;
   justify-content: center;
 }
+
+
+.select-time {
+  display: inline-flex;
+  justify-content: space-between;
+  padding: 1rem 0;
+  margin: 0 1rem;
+  box-sizing: border-box;
+  min-width: 800px;
+  max-width: calc(100vw - 2rem);
+  overflow-x: auto;
+}
+
+@media (max-width: 1200px) {
+  .select-time {
+    min-width: unset;
+  }
+}

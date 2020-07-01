@@ -2,6 +2,8 @@ import React, {Component} from "react";
 import * as chartjs from "chart.js";
 import {Line} from "react-chartjs-2";
 
+import "./line-graph.scss";
+
 class LineGraph extends Component {
 
     render() {
@@ -26,14 +28,43 @@ class LineGraph extends Component {
         };
 
         const options: chartjs.ChartOptions = {
-            tooltips: {
-                position: "average"
-            },
-            maintainAspectRatio: false
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        labelString: "Personenanzahl",
+                        display: true,
+                    },
+                    id: "Counter",
+                    display: true,
+                    ticks: {
+                        min: 0,
+                        max: 50,
+                        stepSize: 5
+                    }
+                }, {
+                    scaleLabel: {
+                        labelString: "Auslastung in %",
+                        display: true,
+                    },
+                    id: "percent",
+                    position: "right",
+                    display: true,
+                    gridLines: {
+                        display: false,
+                    },
+                    ticks: {
+                        min: 0,
+                        max: 100,
+                        stepSize: 10
+                    }
+                }]
+            }
         };
 
         return (
-            <article>
+            <article className="line-graph-container">
                 <Line data={data} options={options}/>
             </article>
         );
