@@ -1,37 +1,49 @@
 import {BadRequestException, Injectable, NotFoundException} from "@nestjs/common";
-import DataLoader from "src/storage/DataLoader";
+
+import {TDataType, DataCrawler, TFacility, ICurrent, TWeek, TYear, IHour} from "src/storage/";
 
 @Injectable()
 export class StorageService {
-    constructor(private dataLoader: DataLoader) {
+    constructor(private dataCrawler: DataCrawler) {
     }
-
 
     async onModuleInit(): Promise<void> {
-        await this.dataLoader.loadDataFromFile();
-        this.dataLoader.startSaveDaemon();
-        this.dataLoader.startCrawlingData();
+        await this.dataCrawler.loadDataFromFile();
+        this.dataCrawler.startSaveDaemon();
+        this.dataCrawler.startCrawlingData();
     }
 
-    getBloeckle(): any {
-        return this.dataLoader.bloeckle.data;
+    getCurrent(facility: TFacility): ICurrent {
+        return this.dataCrawler[facility].extractCurrent();
     }
 
-    getKletterbox(): any {
-        return this.dataLoader.kletterbox.data;
+    getDay(facility: TFacility): IHour[] {
+        return this.dataCrawler[facility].extractDay();
     }
 
-    async onModuleDestroy(): Promise<void> {
-        this.dataLoader.endSaveDaemon();
-        await this.dataLoader.saveAllData();
+    getEstimation(facility: TFacility): TWeek {
+        return this.dataCrawler[facility].extractEstimation();
     }
 
-    mergeDatabase(id: string, buffer: Buffer): void {
-        if (id !== "bloeckle" && id !== "kletterbox") {
-            throw new NotFoundException();
-        }
+    getWeek(facility: TFacility): TWeek {
+        return this.dataCrawler[facility].extractWeek();
+    }
 
-        let fileContent;
+    getMonth(facility: TFacility): TWeek[] {
+        return this.dataCrawler[facility].extractMonth();
+    }
+
+    getYear(facility: TFacility): TYear {
+        return this.dataCrawler[facility].extractYear();
+    }
+
+    getAll(facility: TFacility): TDataType {
+        return this.dataCrawler[facility].data;
+    }
+
+    mergeDatabase(id: TFacility, buffer: Buffer): void {
+
+        let fileContent: TDataType;
         try {
             const bufferString = buffer.toString("utf8");
             fileContent = JSON.parse(bufferString);
@@ -40,9 +52,14 @@ export class StorageService {
         }
 
         try {
-            this.dataLoader[id].mergeDataBases(fileContent);
+            this.dataCrawler[id].mergeDataBases(fileContent);
         } catch {
             throw new BadRequestException("The json schema of your file is wrong");
         }
+    }
+
+    async onModuleDestroy(): Promise<void> {
+        this.dataCrawler.endSaveDaemon();
+        await this.dataCrawler.saveAllData();
     }
 }

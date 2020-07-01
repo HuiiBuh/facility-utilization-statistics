@@ -1,13 +1,15 @@
-import {Module} from "@nestjs/common";
-import {AppController} from "./app.controller";
-import {AppService} from "./app.service";
-import {FacilityController} from "./facility/facility.controller";
-import DataLoader from "./storage/DataLoader";
+import { Module } from '@nestjs/common';
+
+import { StorageService } from 'src/facility/storage.service';
+import { DataCrawler } from 'src/storage/';
+import { AppService } from './app.service';
+
+import { AppController } from './app.controller';
+import { FacilityController } from './facility/facility.controller';
 
 @Module({
     imports: [],
     controllers: [AppController, FacilityController],
-    providers: [AppService, DataLoader],
+    providers: [AppService, DataCrawler, StorageService],
 })
-export class AppModule {
-}
+export class AppModule {}

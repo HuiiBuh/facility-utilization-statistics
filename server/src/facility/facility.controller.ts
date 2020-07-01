@@ -1,10 +1,12 @@
 import {Controller, ForbiddenException, Get, Param, Post, Req, UploadedFile, UseInterceptors} from "@nestjs/common";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {Request} from "express";
-import {StorageService} from "src/facility/storage.service";
 
-import {Current, File} from "./facility.interfaces";
-import {DataType} from "../storage/Storage";
+import {ICurrent, IHour, TDataType, TFacility, TWeek, TYear} from "src/storage";
+
+import {CheckFacility} from "./facility.decorators";
+import {StorageService} from "./storage.service";
+import {IFile} from "./facility.interfaces";
 
 @Controller("facility")
 export class FacilityController {
@@ -15,63 +17,83 @@ export class FacilityController {
         const environment: string = process.env.ENVIRONMENT;
 
         if (!uploadKey && environment === "production") throw new Error("Upload key not found in environment");
-        else uploadKey = "test";
+        else if (!uploadKey && environment !== "production") uploadKey = "test";
 
         this.uploadKey = uploadKey;
     }
 
-
     /**
-     * Get the bloeckle json
+     * Get the bloeckle or kletterbox json
+     * @param facility
      */
-    @Get("bloeckle")
-    getBloeckle(): DataType {
-        return this.storageService.getBloeckle();
+    @Get(":facility")
+    @CheckFacility
+    getAll(@Param("facility") facility: TFacility): TDataType {
+        return this.storageService.getAll(facility);
     }
 
     /**
-     * Get the kletterbox json
+     * Get the current capacity of a facility
+     * @param facility
      */
-    @Get("kletterbox")
-    getKletterbox(): DataType {
-        return this.storageService.getKletterbox();
-    }
-
     @Get(":facility/current")
-    getCurrent(): Current {
-
+    @CheckFacility
+    getCurrent(@Param("facility") facility: TFacility): ICurrent {
+        return this.storageService.getCurrent(facility);
     }
 
-    @Get(":facility/estimation")
-    getEstimation() {
-
+    /**
+     * Get the capacity for every hour of the day
+     * @param facility
+     */
+    @Get(":facility/day")
+    @CheckFacility
+    getDay(@Param("facility") facility: TFacility): IHour[] {
+        return this.storageService.getDay(facility);
     }
 
+    /**
+     * Get the capacities for every day of a week in a facility
+     * @param facility
+     */
     @Get(":facility/week")
-    getWeek() {
+    @CheckFacility
+    getWeek(@Param("facility") facility: TFacility): TWeek {
+        return this.storageService.getWeek(facility);
+    }
 
+    /**
+     * Get the hourliy capacity estimation for every day of one week
+     * @param facility
+     */
+    @Get(":facility/estimation")
+    @CheckFacility
+    getEstimation(@Param("facility") facility: TFacility): TWeek {
+        return this.storageService.getEstimation(facility);
     }
 
     @Get(":facility/month")
-    getMonth() {
-
+    @CheckFacility
+    getMonth(@Param("facility") facility: TFacility): TWeek[] {
+        return this.storageService.getMonth(facility);
     }
 
     @Get(":facility/year")
-    getYear() {
-
+    @CheckFacility
+    getYear(@Param("facility") facility: TFacility): TYear {
+        return this.storageService.getYear(facility);
     }
-
 
     /**
      * Upload a database to the server
+     * @param facility The bloeckle or kletterbox
      * @param file The database file
-     * @param facility The blöckle or kletterbox
      * @param request The upload request
      */
     @Post(":facility/upload")
     @UseInterceptors(FileInterceptor("file"))
-    uploadFile(@UploadedFile() file: File, @Param("id") facility: string, @Req() request: Request): void {
+    @CheckFacility
+    uploadFile(@Param("facility") facility: TFacility, @UploadedFile() file: IFile, @Req() request: Request): void {
         const accessKey = request.headers["x-access-key"];
         if (accessKey !== this.uploadKey) {
             throw new ForbiddenException("Wrong password");
@@ -79,6 +101,4 @@ export class FacilityController {
 
         this.storageService.mergeDatabase(facility, file.buffer);
     }
-
-
 }

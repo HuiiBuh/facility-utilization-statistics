@@ -1,26 +1,38 @@
 import * as fs from "fs";
-import {DataType, day, Hour, IDataObject, IHour, IStorageAccessKeys, Week} from "src/storage/stoarge.interfaces";
 import * as tv4 from "tv4";
 
-import {sleep} from "./DataLoader";
+import {
+    TDataType,
+    TDay,
+    THour,
+    IDataObject,
+    IHour,
+    IStorageAccessKeys,
+    TWeek,
+    ICurrent,
+    TYear,
+} from "./stoarge.interfaces";
+import {sleep} from "./functions";
 import jsonSchema from "src/storage/json.schema";
-
 
 /**
  * An object which handles the updating and storing of the collected data
  */
 export default class DataStorage {
-
     private fileName: string;
 
-    private _data: DataType = {};
-    private _saveData = false;
+    private _data: TDataType = {
+        current: {
+            maxPersonCount: 0,
+            value: 0,
+        },
+        year: {},
+    };
+    private _saveData: boolean = false;
 
     public JSONSchema = jsonSchema;
     public saveInterval = 5 * 60 * 1000;
     public maxPersonCount: number;
-
-    public static INSTANCE: DataStorage = null;
 
     /**
      * Create a new DataStorage. To use the autosave feature set saveData to true
@@ -28,12 +40,6 @@ export default class DataStorage {
      * @param fileName The filename the data will be saved
      */
     constructor(maxPersonCount: number, fileName = "data.json") {
-
-        if (DataStorage.INSTANCE) {
-            DataStorage.INSTANCE.maxPersonCount = maxPersonCount;
-            return DataStorage.INSTANCE;
-        }
-
         this.fileName = fileName;
         this.maxPersonCount = maxPersonCount;
     }
@@ -42,7 +48,7 @@ export default class DataStorage {
      * Validate the json scheme
      * @param json The json
      */
-    public validateJSON(json: DataType): void {
+    public validateJSON(json: TDataType): void {
         const value: boolean = tv4.validate(json, this.JSONSchema);
         if (value === false) throw Error(JSON.stringify(tv4.error));
     }
@@ -61,13 +67,6 @@ export default class DataStorage {
     }
 
     /**
-     * Get weather the current data gets saved continuously
-     */
-    get saveData(): boolean {
-        return this._saveData;
-    }
-
-    /**
      * Set the value to true to start the saveData service and to false to stop it
      * @param value True > start saving False > stop saving
      */
@@ -78,7 +77,7 @@ export default class DataStorage {
         }
     }
 
-    get data(): DataType {
+    get data(): TDataType {
         return this._data;
     }
 
@@ -87,7 +86,7 @@ export default class DataStorage {
      * @param value The new value
      * @throws Error if data structure is not valid
      */
-    set data(value: DataType) {
+    set data(value: TDataType) {
         this.validateJSON(value);
         this._data = value;
     }
@@ -121,10 +120,10 @@ export default class DataStorage {
      * @param fileName Optional the filename the data should be saved to
      */
     public writeToFile(fileName = this.fileName): Promise<any> {
-        return new Promise(((resolve) => {
+        return new Promise(resolve => {
             const dataString = JSON.stringify(this._data);
             fs.writeFile(fileName, dataString, resolve);
-        }));
+        });
     }
 
     /**
@@ -132,14 +131,14 @@ export default class DataStorage {
      * @param database The database which should be merged
      * @throws Error if data structure is not valid
      */
-    public mergeDataBases(database: DataType): void {
+    public mergeDataBases(database: TDataType): void {
         // Validate the database schema
         this.validateJSON(database);
 
         // For each year
-        for (const year in database) {
-            if (!database.hasOwnProperty(year)) continue;
-            const yearObject: Week[] = database[year];
+        for (const year in database.year) {
+            if (!database.year.hasOwnProperty(year)) continue;
+            const yearObject: TWeek[] = database.year[year];
 
             // For each week
             for (const week in yearObject) {
@@ -159,18 +158,28 @@ export default class DataStorage {
                         const keys: IStorageAccessKeys = {
                             year: parseInt(year),
                             week: parseInt(week),
-                            day: day as day,
+                            day: day as TDay,
                             hour: parseInt(hour),
                             firstHalf: true,
                         };
 
                         // Insert the data in the database
                         if (hourObject.firstHalf.valueCount !== 0) {
-                            this.setInformation(hourObject.firstHalf.value, hourObject.firstHalf.valueCount, keys);
+                            this.setInformation(
+                                hourObject.firstHalf.value,
+                                false,
+                                hourObject.firstHalf.valueCount,
+                                keys,
+                            );
                         }
                         if (hourObject.secondHalf.valueCount !== 0) {
                             keys.firstHalf = false;
-                            this.setInformation(hourObject.secondHalf.value, hourObject.secondHalf.valueCount, keys);
+                            this.setInformation(
+                                hourObject.secondHalf.value,
+                                false,
+                                hourObject.secondHalf.valueCount,
+                                keys,
+                            );
                         }
                     }
                 }
@@ -181,53 +190,60 @@ export default class DataStorage {
     /**
      * Set the information for a specific time
      * @param data The utilization
+     * @param isCurrent Is this a current data
      * @param dataWeight The weight the data has (if it is one data point it is 1 if two combined in one 2, ...)
      * @param keys The keys which lead to the time
      */
-    public setInformation(data: number, dataWeight: number = 1, keys: IStorageAccessKeys = DataStorage.getJSONKeys()): void {
+    public setInformation(
+        data: number,
+        isCurrent: boolean = true,
+        dataWeight: number = 1,
+        keys: IStorageAccessKeys = DataStorage.getJSONKeys(),
+    ): void {
+        // Set current data
+        if (isCurrent) {
+            this._data.current.value = data;
+            this._data.current.maxPersonCount = this.maxPersonCount;
+        }
 
         // Extract the variables out of the object
         const {year, week, day, hour, firstHalf} = keys;
 
-        if (!this._data[year]) {
-            this.initYear(keys);
+        if (!this._data.year[year]) {
+            this._data.year[year] = DataStorage.initYear();
         }
 
-        if (!this._data[year][week]) {
-            this.initWeeks(keys);
+        if (!this._data.year[year][week]) {
+            this._data.year[year][week] = DataStorage.initWeek(this._data.current.maxPersonCount);
         }
 
-        if (!this._data[year][week].data[day]) {
-            this.initDays(keys);
+        if (!this._data.year[year][week].data[day]) {
+            DataStorage.initDays(this._data.year[year][week]);
         }
 
         let dataObject: IDataObject;
-        if (firstHalf) dataObject = this._data[year][week].data[day][hour].firstHalf;
-        else dataObject = this._data[year][week].data[day][hour].secondHalf;
+        if (firstHalf) dataObject = this._data.year[year][week].data[day][hour].firstHalf;
+        else dataObject = this._data.year[year][week].data[day][hour].secondHalf;
 
-        dataObject.value = (dataObject.value * dataObject.valueCount + data * dataWeight) / (dataObject.valueCount + dataWeight);
+        dataObject.value =
+            (dataObject.value * dataObject.valueCount + data * dataWeight) / (dataObject.valueCount + dataWeight);
         dataObject.valueCount += dataWeight;
     }
 
     /**
      * Init the year
-     * @param keys Keys which specify what year, week, ...
      */
-    private initYear(keys: IStorageAccessKeys): void {
-        this._data[keys.year] = new Array<Week>(52);
-
-        this.initWeeks(keys);
+    private static initYear(): TWeek[] {
+        // week 0 is left empty
+        return new Array<TWeek>(53);
     }
 
     /**
-     * Init the week
-     * @param keys Keys which specify what year, week, ...
+     * Init a week object
      * */
-    private initWeeks(keys: IStorageAccessKeys): void {
-        const {year, week} = keys;
-
+    private static initWeek(maxPersonCount: number): TWeek {
         // Initialize the week which should be used
-        this._data[year][week] = {
+        const weekObject: TWeek = {
             data: {
                 Monday: new Array<IHour>(24),
                 Saturday: new Array<IHour>(24),
@@ -235,39 +251,39 @@ export default class DataStorage {
                 Thursday: new Array<IHour>(24),
                 Tuesday: new Array<IHour>(24),
                 Wednesday: new Array<IHour>(24),
-                Friday: new Array<IHour>(24)
+                Friday: new Array<IHour>(24),
             },
-            maxPersonCount: this.maxPersonCount
+            maxPersonCount: maxPersonCount,
         };
 
-        this.initDays(keys);
+        DataStorage.initDays(weekObject);
+        return weekObject;
     }
 
     /**
      * Init the days of a week
-     * @param keys Keys which specify what year, week, ...
+     * @param weekObject An initialized week object
      */
-    private initDays(keys: IStorageAccessKeys): void {
-        const {year, week} = keys;
+    private static initDays(weekObject: TWeek): Record<TDay, THour> {
+        const weekList: Record<TDay, THour> = weekObject.data;
+        for (const day in weekList) {
+            if (!weekList.hasOwnProperty(day)) continue;
 
-        const weekObject: Record<day, Hour> = this._data[year][week].data;
-        for (const day in weekObject) {
-            if (!weekObject.hasOwnProperty(day)) continue;
-
-            weekObject[day] = new Array<IHour>(24);
+            weekList[day] = new Array<IHour>(24);
             for (let hour = 0; hour < 24; ++hour) {
-                weekObject[day][hour] = {
+                weekList[day][hour] = {
                     firstHalf: {
                         value: 0,
-                        valueCount: 0
+                        valueCount: 0,
                     },
                     secondHalf: {
                         value: 0,
-                        valueCount: 0
-                    }
+                        valueCount: 0,
+                    },
                 };
             }
         }
+        return weekList;
     }
 
     /**
@@ -275,11 +291,13 @@ export default class DataStorage {
      */
     public static getJSONKeys(currentDate = new Date()): IStorageAccessKeys {
         return {
-            day: currentDate.toLocaleString("en-us", {weekday: "long"}) as day,
+            day: currentDate.toLocaleString("en-us", {
+                weekday: "long",
+            }) as TDay,
             year: currentDate.getFullYear(),
             week: DataStorage.getWeek() - 1,
             hour: currentDate.getHours(),
-            firstHalf: currentDate.getMinutes() < 30
+            firstHalf: currentDate.getMinutes() < 30,
         };
     }
 
@@ -287,16 +305,85 @@ export default class DataStorage {
      * Get current week number
      */
     public static getWeek(date = new Date()): number {
-
         // Copy the date object so you don't change the original
         date = new Date(date);
 
         date.setHours(0, 0, 0, 0);
         // Thursday in current week decides the year.
-        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+        date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
         // January 4 is always in week 1.
         const week1 = new Date(date.getFullYear(), 0, 4);
         // Adjust to Thursday in week 1 and count number of weeks from date to week1.
-        return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+        return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+    }
+
+    /*Extract the data*************************************************************************************************/
+
+    extractCurrent(): ICurrent {
+        return this._data.current;
+    }
+
+    extractDay(): Array<IHour> {
+        const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
+        return this._data.year[keys.year][keys.week].data[keys.day];
+    }
+
+    extractWeek(): TWeek {
+        const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
+        return this._data.year[keys.year][keys.week];
+    }
+
+    extractEstimation(): TWeek {
+        const {year, week} = DataStorage.getJSONKeys();
+
+        const weekObject: TWeek = DataStorage.initWeek(this._data.year[year][week].maxPersonCount);
+
+        for (let i = week - 4; i <= week; ++i) {
+            if (!this._data.year[year][i]) continue;
+
+            const weekData = this._data.year[year][i].data;
+
+            for (const day in weekData) {
+                if (!weekData.hasOwnProperty(day)) continue;
+                const dayObject: IHour[] = weekData[day];
+
+                dayObject.forEach((hourObject: IHour, hour: number) => {
+                    let data = hourObject.firstHalf.value;
+                    let dataWeight = hourObject.firstHalf.valueCount;
+                    weekObject.data[day][hour].firstHalf.value =
+                        (hourObject.firstHalf.value * hourObject.firstHalf.valueCount + data * dataWeight) /
+                        (hourObject.firstHalf.valueCount + dataWeight);
+                    weekObject.data[day][hour].firstHalf.valueCount += dataWeight;
+
+                    data = hourObject.secondHalf.value;
+                    dataWeight = hourObject.secondHalf.valueCount;
+                    weekObject.data[day][hour].secondHalf.value =
+                        (hourObject.secondHalf.value * hourObject.secondHalf.valueCount + data * dataWeight) /
+                        (hourObject.secondHalf.valueCount + dataWeight);
+                    weekObject.data[day][hour].secondHalf.valueCount += dataWeight;
+                });
+            }
+        }
+
+        return weekObject;
+    }
+
+    extractMonth(): TWeek[] {
+        const {year, week} = DataStorage.getJSONKeys();
+
+        const month: TWeek[] = [];
+        for (let i = 0; i < 4; ++i) {
+            month.push(this._data.year[year][week - i]);
+        }
+        //TODO Make the month only a list of weeks with days
+
+        return month;
+    }
+
+    extractYear(): TYear {
+        const {year} = DataStorage.getJSONKeys();
+        //TODO Make the year only a list of months with weeks
+
+        return this._data.year[year];
     }
 }

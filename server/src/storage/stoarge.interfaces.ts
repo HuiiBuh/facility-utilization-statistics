@@ -1,29 +1,31 @@
-export type day = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday"
+export type TDay = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
 
 export interface IStorageAccessKeys {
-    day: day;
+    day: TDay;
     year: number;
     week: number;
     hour: number;
-    firstHalf: boolean
+    firstHalf: boolean;
 }
 
 export interface IHour {
-    firstHalf: IDataObject
-    secondHalf: IDataObject
+    firstHalf: IDataObject;
+    secondHalf: IDataObject;
 }
 
 export interface IDataObject {
-    value: number
-    valueCount: number
+    value: number;
+    valueCount: number;
 }
 
 export interface ICurrent {
-    value: number
-    maxPersonCount: number
+    value: number;
+    maxPersonCount: number;
 }
 
-export type Hour = Array<IHour>;
-export type Week = { data: Record<day, Hour>, maxPersonCount: number }
-export type Year = Array<Week>;
-export type DataType = Record<number, Year>;
+export type TFacility = 'bloeckle' | 'kletterbox';
+
+export type THour = Array<IHour>;
+export type TWeek = { data: Record<TDay, THour>; maxPersonCount: number };
+export type TYear = Array<TWeek>;
+export type TDataType = { current: ICurrent; year: Record<number, TYear> };

@@ -1,32 +1,35 @@
-import {Injectable} from "@nestjs/common";
+import ApiClient from 'src/app.request.maker';
+import DataStorage from 'src/storage/data-storage';
+import { sleep } from './functions';
 
-import ApiClient from "./ApiClient";
-import DataStorage from "./Storage";
+export default class DataCrawler {
+    private static bloeckleURL =
+        'https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined';
+    public bloeckle = new DataStorage(50, 'db/bloeckle.json');
 
-@Injectable()
-export default class DataLoader {
-    private static bloeckleURL = "https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined";
-    public bloeckle = new DataStorage(50, "db/bloeckle.json");
+    private static kletterboxURL =
+        'https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM';
+    public kletterbox = new DataStorage(30, 'db/kletterbox.json');
 
-    private static kletterboxURL = "https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM";
-    public kletterbox = new DataStorage(30, "db/kletterbox.json");
+    private static INSTANCE: DataCrawler = null;
 
-    private crawlingInterval: number;
+    public crawlingInterval: number = 2;
 
     /**
      * The data-loader service
-     * @param crawlingInterval The interval the data gets crawled
      */
-    constructor(crawlingInterval: number = 2) {
-        this.crawlingInterval = crawlingInterval;
+    constructor() {
+        if (DataCrawler.INSTANCE) return DataCrawler.INSTANCE;
+
+        DataCrawler.INSTANCE = this;
     }
 
     /**
      * Load the databases from the files
      */
     public async loadDataFromFile(): Promise<void> {
-        await this.bloeckle.loadFromFile().catch((e) => console.log("Could not load the bloeckle database.\n", e));
-        await this.kletterbox.loadFromFile().catch((e) => console.log("Could not load the kletterbox database.\n", e));
+        await this.bloeckle.loadFromFile().catch(e => console.log('Could not load the bloeckle database.\n', e));
+        await this.kletterbox.loadFromFile().catch(e => console.log('Could not load the kletterbox database.\n', e));
     }
 
     /**
@@ -58,10 +61,10 @@ export default class DataLoader {
      */
     public startCrawlingData(): void {
         this.loadBloeckleData().then(() => {
-            console.log("Bloeckle crawling stopped");
+            console.log('Bloeckle crawling stopped');
         });
         this.loadKletterboxData().then(() => {
-            console.log("Kletterbox crawling stopped");
+            console.log('Kletterbox crawling stopped');
         });
     }
 
@@ -71,11 +74,13 @@ export default class DataLoader {
     private async loadBloeckleData(): Promise<void> {
         const apiClient = new ApiClient();
         while (true) {
-            let response: string | void = await apiClient.get(DataLoader.bloeckleURL).catch((error) => console.log(error));
-            if (!response) response = "";
+            let response: string | void = await apiClient
+                .get(DataCrawler.bloeckleURL)
+                .catch(error => console.log(error));
+            if (!response) response = '';
 
             try {
-                this.bloeckle.setInformation(DataLoader.extractBloeckleData(response));
+                this.bloeckle.setInformation(DataCrawler.extractBloeckleData(response));
             } catch (e) {
                 console.error(e);
             }
@@ -84,7 +89,7 @@ export default class DataLoader {
     }
 
     /**
-     * Extract the data from the blockle website
+     * Extract the data from the bloeckle website
      * @param data The crawled data
      * @returns The blocked percentage
      */
@@ -93,7 +98,7 @@ export default class DataLoader {
         const startMatch: RegExpExecArray = startRegex.exec(data);
         const startIndex: number = startMatch.index + startMatch[0].length;
 
-        const endRegex = new RegExp("% *;");
+        const endRegex = new RegExp('% *;');
         const endMatch: RegExpExecArray = endRegex.exec(data);
         const endIndex = endMatch.index;
 
@@ -107,15 +112,17 @@ export default class DataLoader {
     private async loadKletterboxData(): Promise<void> {
         const apiClient = new ApiClient();
         while (true) {
-            let response: string | void = await apiClient.get(DataLoader.kletterboxURL).catch((error) => console.log(error));
-            if (!response) response = "";
+            let response: string | void = await apiClient
+                .get(DataCrawler.kletterboxURL)
+                .catch(error => console.log(error));
+            if (!response) response = '';
 
             try {
-                this.kletterbox.setInformation(DataLoader.extractKletterboxData(response));
+                this.kletterbox.setInformation(DataCrawler.extractKletterboxData(response));
             } catch (e) {
                 console.error(e);
             }
-            await sleep(5 * 60 * 1000);
+            await sleep(this.crawlingInterval * 60 * 1000);
         }
     }
 
@@ -125,7 +132,7 @@ export default class DataLoader {
      * @returns The blocked percentage
      */
     private static extractKletterboxData(data: string): number {
-        const startRegex = new RegExp(`<span data-value="`, "g");
+        const startRegex = new RegExp(`<span data-value="`, 'g');
 
         const startMatchOne: RegExpExecArray = startRegex.exec(data);
         const startIndexOne: number = startMatchOne.index + startMatchOne[0].length;
@@ -133,7 +140,7 @@ export default class DataLoader {
         const startMatchTwo: RegExpExecArray = startRegex.exec(data);
         const startIndexTwo: number = startMatchTwo.index + startMatchTwo[0].length;
 
-        const endRegex = new RegExp("\">[0-9]*</span>", "g");
+        const endRegex = new RegExp('">[0-9]*</span>', 'g');
         const endIndexOne: number = endRegex.exec(data).index;
         const endIndexTwo: number = endRegex.exec(data).index;
 
@@ -141,13 +148,4 @@ export default class DataLoader {
         const free: number = parseFloat(data.slice(startIndexTwo, endIndexTwo));
         return (blocked / (blocked + free)) * 100;
     }
-
-}
-
-/**
- * Sleep function
- * @param ms The time the function sleeps
- */
-export async function sleep(ms: number): Promise<void> {
-    return new Promise((resolve => setTimeout(() => resolve(), ms)));
 }
