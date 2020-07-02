@@ -1,0 +1,6 @@
+version: '2.0'
+services:
+  development-reverse-proxy:
+    container_name: development_proxy_climbing
+    network_mode: "host"
+    build: .
