@@ -5,8 +5,8 @@ import * as chartjs from "chart.js";
 import "./bar-graph.scss";
 
 interface Props {
-    data: number;
-    maxCount: number
+    maxPersonCount: number
+    value: number;
 }
 
 export default class BarGraph extends Component {
@@ -17,8 +17,8 @@ export default class BarGraph extends Component {
             labels: ["Auslastung"],
             datasets: [
                 {
-                    label: "Personen",
-                    yAxisID: "Counter",
+                    label: "Prozent",
+                    yAxisID: "percent",
                     backgroundColor: "rgb(255,153,0)",
                     hoverBackgroundColor: "rgb(255,153,0)",
                     borderColor: "rgb(236,134,9)",
@@ -43,18 +43,6 @@ export default class BarGraph extends Component {
             scales: {
                 yAxes: [{
                     scaleLabel: {
-                        labelString: "Personenanzahl",
-                        display: true,
-                    },
-                    id: "Counter",
-                    display: true,
-                    ticks: {
-                        min: 0,
-                        max: 50,
-                        stepSize: 5
-                    }
-                }, {
-                    scaleLabel: {
                         labelString: "Auslastung in %",
                         display: true,
                     },
@@ -69,6 +57,18 @@ export default class BarGraph extends Component {
                         max: 100,
                         stepSize: 10
                     }
+                }, {
+                    scaleLabel: {
+                        labelString: "Personenanzahl",
+                        display: true,
+                    },
+                    id: "counter",
+                    display: true,
+                    ticks: {
+                        min: 0,
+                        max: 50,
+                        stepSize: 5
+                    }
                 }]
             }
         }
@@ -79,8 +79,8 @@ export default class BarGraph extends Component {
 
     static getDerivedStateFromProps(newProps: Props, _: any) {
         const copy = {...BarGraph.data};
-        copy.data.datasets[0].data = [newProps.data];
-        copy.options.scales.yAxes[0].ticks.max = newProps.maxCount;
+        copy.data.datasets[0].data = [Math.floor(newProps.value)];
+        copy.options.scales.yAxes[1].ticks.max = newProps.maxPersonCount;
         return copy;
     }
 

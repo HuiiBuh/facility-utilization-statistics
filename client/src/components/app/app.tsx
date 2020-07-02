@@ -28,8 +28,8 @@ class App extends React.Component {
                 <div className="right">
 
                     <Switch>
-                        <Route path="/facility/:id" render={({match}) => (
-                            <Facility id={match.params.id}/>)}>
+                        <Route path="/facility/:facility" render={({match}) => (
+                            <Facility facility={match.params.facility}/>)}>
                         </Route>
                         <Route exact path="/credits">
                             <Credits/>

@@ -8,7 +8,7 @@ import {CheckFacility} from "./facility.decorators";
 import {StorageService} from "./storage.service";
 import {IFile} from "./facility.interfaces";
 
-@Controller("facility")
+@Controller("api/facility")
 export class FacilityController {
     private readonly uploadKey: string;
 
@@ -63,7 +63,7 @@ export class FacilityController {
     }
 
     /**
-     * Get the hourliy capacity estimation for every day of one week
+     * Get the hourly capacity estimation for every day of one week
      * @param facility
      */
     @Get(":facility/estimation")

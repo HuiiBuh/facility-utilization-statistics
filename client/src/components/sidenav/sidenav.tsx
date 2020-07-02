@@ -44,7 +44,7 @@ export default class Sidenav extends React.Component {
 
                     <hr className="divider"/>
 
-                    <NavLink to="/facility/blöckle/current" className="menu-entry" activeClassName="nav-active">
+                    <NavLink to="/facility/bloeckle/current" className="menu-entry" activeClassName="nav-active">
                         <h2>Blöckle</h2>
                     </NavLink>
 

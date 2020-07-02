@@ -36,7 +36,7 @@ export default class Admin extends React.Component {
                     <input type="password" placeholder="Passwort"/>
                     <div className="custom-select">
                         <select>
-                            <option value="blöckle">Blöckle</option>
+                            <option value="bloeckle">Blöckle</option>
                             <option value="kletterbox">Kletterbox</option>
                         </select>
                     </div>
