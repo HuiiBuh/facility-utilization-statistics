@@ -1,19 +1,19 @@
 import * as fs from "fs";
+import jsonSchema from "src/storage/json.schema";
 import * as tv4 from "tv4";
+import {sleep} from "./functions";
 
 import {
-    TDataType,
-    TDay,
-    THour,
+    ICurrent,
     IDataObject,
     IHour,
     IStorageAccessKeys,
+    TDataType,
+    TDay,
+    THour,
     TWeek,
-    ICurrent,
     TYear,
 } from "./stoarge.interfaces";
-import {sleep} from "./functions";
-import jsonSchema from "src/storage/json.schema";
 
 /**
  * An object which handles the updating and storing of the collected data

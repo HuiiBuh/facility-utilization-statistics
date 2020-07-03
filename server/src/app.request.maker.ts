@@ -1,6 +1,6 @@
-import * as https from 'https';
-import { RequestOptions } from 'https';
-import { ClientRequest, IncomingMessage, OutgoingHttpHeaders } from 'http';
+import {ClientRequest, IncomingMessage, OutgoingHttpHeaders} from "http";
+import * as https from "https";
+import {RequestOptions} from "https";
 
 export default class RequestMaker {
     private readonly _baseURL: string;
@@ -11,7 +11,7 @@ export default class RequestMaker {
      * @param baseURL The base url of the server
      * @param header The headers which should be sent with every request
      */
-    constructor(baseURL = '', header: OutgoingHttpHeaders = null) {
+    constructor(baseURL = "", header: OutgoingHttpHeaders = null) {
         this._baseURL = baseURL;
         this.headers = header;
     }
@@ -27,7 +27,7 @@ export default class RequestMaker {
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
     ): Promise<string> {
-        return await this.request('PUT', url, urlParams, body);
+        return await this.request("PUT", url, urlParams, body);
     }
 
     /**
@@ -41,7 +41,7 @@ export default class RequestMaker {
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
     ): Promise<string> {
-        return await this.request('GET', url, urlParams, body);
+        return await this.request("GET", url, urlParams, body);
     }
 
     /**
@@ -55,7 +55,7 @@ export default class RequestMaker {
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
     ): Promise<string> {
-        return await this.request('POST', url, urlParams, body);
+        return await this.request("POST", url, urlParams, body);
     }
 
     /**
@@ -69,7 +69,7 @@ export default class RequestMaker {
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
     ): Promise<string> {
-        return await this.request('DELETE', url, urlParams, body);
+        return await this.request("DELETE", url, urlParams, body);
     }
 
     /**
@@ -80,7 +80,7 @@ export default class RequestMaker {
      * @param body The body as a json
      */
     public async request(
-        method: 'GET' | 'POST' | 'DELETE' | 'PUT',
+        method: "GET" | "POST" | "DELETE" | "PUT",
         url: string,
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
@@ -88,12 +88,12 @@ export default class RequestMaker {
         // Add url params
         url = this._baseURL + url;
         if (urlParams) {
-            url += '?' + new URLSearchParams(urlParams).toString();
+            url += "?" + new URLSearchParams(urlParams).toString();
         }
 
-        let bodyString = '';
+        let bodyString = "";
         // Parse the json object to string
-        if (typeof body === 'object') {
+        if (typeof body === "object") {
             bodyString = JSON.stringify(body);
         }
 
@@ -117,17 +117,17 @@ export default class RequestMaker {
             }
 
             const req: ClientRequest = https.request(url, options, (res: IncomingMessage) => {
-                let data = '';
+                let data = "";
 
-                res.on('data', chunk => {
+                res.on("data", chunk => {
                     data += chunk;
                 });
-                res.on('end', () => {
+                res.on("end", () => {
                     resolve(data);
                 });
             });
 
-            req.on('error', (error: Error) => {
+            req.on("error", (error: Error) => {
                 reject(error);
             });
 

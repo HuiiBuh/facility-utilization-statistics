@@ -1,19 +1,12 @@
 import React from "react";
-import Today from "./today/today";
+import {NavLink, Route, Switch} from "react-router-dom";
 import {RoundButton} from "../index";
+import Current from "./current/current";
+import WeekData from "./week-data/week-data";
 
 import "./facility.scss";
-import {NavLink, Route, Switch} from "react-router-dom";
-import {BarGraph, LineGraph} from "../graphs";
 
-type TStateString = "current" | "expected" | "month" | "year" | "today" | "week"
-
-interface IsActive {
-    isExact: boolean
-    params: object
-    path: string
-    url: string
-}
+type TStateString = "current" | "estimation" | "month" | "year" | "week"
 
 interface Props {
     facility: string
@@ -23,8 +16,7 @@ interface State {
 
     current: boolean
     week: boolean
-    expected: boolean
-    today: boolean
+    estimation: boolean
     month: boolean
     year: boolean
 }
@@ -36,8 +28,7 @@ export default class Facility extends React.Component {
     state: State = {
         current: true,
         week: false,
-        today: false,
-        expected: false,
+        estimation: false,
         month: false,
         year: false,
     };
@@ -60,9 +51,8 @@ export default class Facility extends React.Component {
         return (): void => {
             const stateUpdate: State = {
                 current: false,
-                today: false,
                 week: false,
-                expected: false,
+                estimation: false,
                 month: false,
                 year: false
             };
@@ -97,14 +87,6 @@ export default class Facility extends React.Component {
                                          isActive={this.state.current}>Aktuell</RoundButton>
                         </NavLink>
 
-                        <NavLink to={`/facility/${this.props.facility}/today`} exact tabIndex={-1}
-                                 onClick={this.updateActiveButton("today")}
-                                 onKeyPress={this.onEnter("today")}>
-                            <RoundButton isSmall={true}
-                                         type={this.state.today ? "primary" : "secondary"}
-                                         isActive={this.state.today}>Heute</RoundButton>
-                        </NavLink>
-
                         <NavLink to={`/facility/${this.props.facility}/week`} tabIndex={-1}
                                  onClick={this.updateActiveButton("week")}
                                  onKeyPress={this.onEnter("week")}>
@@ -113,12 +95,28 @@ export default class Facility extends React.Component {
                                          isActive={this.state.week}>Woche</RoundButton>
                         </NavLink>
 
-                        <NavLink to={`/facility/${this.props.facility}/expected`} tabIndex={-1}
-                                 onClick={this.updateActiveButton("expected")}
-                                 onKeyPress={this.onEnter("expected")}>
+                        <NavLink to={`/facility/${this.props.facility}/estimation`} tabIndex={-1}
+                                 onClick={this.updateActiveButton("estimation")}
+                                 onKeyPress={this.onEnter("estimation")}>
                             <RoundButton isSmall={true}
-                                         type={this.state.expected ? "primary" : "secondary"}
-                                         isActive={this.state.expected}>Erwartet</RoundButton>
+                                         type={this.state.estimation ? "primary" : "secondary"}
+                                         isActive={this.state.estimation}>Erwartet</RoundButton>
+                        </NavLink>
+
+                        <NavLink to={`/facility/${this.props.facility}/month`} tabIndex={-1}
+                                 onClick={this.updateActiveButton("month")}
+                                 onKeyPress={this.onEnter("month")}>
+                            <RoundButton isSmall={true}
+                                         type={this.state.month ? "primary" : "secondary"}
+                                         isActive={this.state.month}>Monat</RoundButton>
+                        </NavLink>
+
+                        <NavLink to={`/facility/${this.props.facility}/year`} tabIndex={-1}
+                                 onClick={this.updateActiveButton("year")}
+                                 onKeyPress={this.onEnter("year")}>
+                            <RoundButton isSmall={true}
+                                         type={this.state.year ? "primary" : "secondary"}
+                                         isActive={this.state.year}>Jahr</RoundButton>
                         </NavLink>
 
                     </div>
@@ -129,16 +127,19 @@ export default class Facility extends React.Component {
                     <Switch>
 
                         <Route path={`/facility/${this.props.facility}/current`} exact>
-                            <Today facility={this.props.facility}/>
-                        </Route>
-                        <Route path={`/facility/${this.props.facility}/today`} exact>
-                            <LineGraph/>
+                            <Current facility={this.props.facility}/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/week`} exact>
-                            <LineGraph/>
+                            <WeekData facility={this.props.facility} scope="week"/>
                         </Route>
-                        <Route path={`/facility/${this.props.facility}/expected`} exact>
-                            <LineGraph/>
+                        <Route path={`/facility/${this.props.facility}/estimation`} exact>
+                            <WeekData facility={this.props.facility} scope="estimation"/>
+                        </Route>
+                        <Route path={`/facility/${this.props.facility}/month`} exact>
+                            <h1 className="text-center">Coming soon</h1>
+                        </Route>
+                        <Route path={`/facility/${this.props.facility}/year`} exact>
+                            <h1 className="text-center">Coming soon</h1>
                         </Route>
 
                     </Switch>

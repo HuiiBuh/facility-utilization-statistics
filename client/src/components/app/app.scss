@@ -13,6 +13,7 @@ $left-width: 300px;
 
 
 .right {
+  overflow: auto;
   position: relative;
   height: 100vh;
   width: calc(100vw - #{$left-width});

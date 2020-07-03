@@ -1,5 +1,11 @@
 .line-graph-container {
-  width: 90%;
+  width: calc(100%);
+  padding: 0 2rem;
+  box-sizing: border-box;
   min-height: 200px;
   height: 30%
+}
+
+.line-graph-heading {
+  margin: 1rem 0 0 0;
 }

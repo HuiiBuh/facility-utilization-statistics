@@ -5,6 +5,8 @@ import {BarGraph, LineGraph} from "../../graphs";
 interface State {
     maxPersonCount: number
     value: number
+    color: string
+    borderColor: string
 }
 
 interface Props {
@@ -46,7 +48,18 @@ export default class Current extends React.Component {
      * Update the component with the most recent data from the server
      */
     async updateComponent(): Promise<void> {
-        const response: any = await Current.apiClient.get(`${this.props.facility}/current`);
+        const response: State = await Current.apiClient.get(`${this.props.facility}/current`);
+        if (response.value < 50) {
+            response.color = "rgb(99,154,26)";
+            response.borderColor = "rgb(99,154,26)";
+        } else if (response.value < 75) {
+            response.color = "rgb(255,153,0)";
+            response.borderColor = "rgb(236,134,9)";
+        } else {
+            response.color = "rgb(205,65,65)";
+            response.borderColor = "rgb(205,65,36)";
+        }
+
         this.setState(response);
     }
 
@@ -57,8 +70,9 @@ export default class Current extends React.Component {
             return <div/>;
 
         return <div className="full-width">
-            <BarGraph maxPersonCount={this.state.maxPersonCount} value={this.state.value}/>
-            <LineGraph/>
+            <BarGraph maxPersonCount={this.state.maxPersonCount} value={this.state.value}
+                      borderColor={this.state.borderColor} color={this.state.color}/>
+            {/*<LineGraph/>*/}
         </div>;
 
 

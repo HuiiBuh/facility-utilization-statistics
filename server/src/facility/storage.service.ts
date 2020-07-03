@@ -1,6 +1,6 @@
-import {BadRequestException, Injectable, NotFoundException} from "@nestjs/common";
+import {BadRequestException, Injectable} from "@nestjs/common";
 
-import {TDataType, DataCrawler, TFacility, ICurrent, TWeek, TYear, IHour} from "src/storage/";
+import {DataCrawler, ICurrent, IHour, TDataType, TFacility, TWeek, TYear} from "src/storage/";
 
 @Injectable()
 export class StorageService {

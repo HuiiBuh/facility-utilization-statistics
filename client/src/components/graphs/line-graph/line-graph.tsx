@@ -1,13 +1,23 @@
-import React, {Component} from "react";
 import * as chartjs from "chart.js";
+import React, {Component} from "react";
 import {Line} from "react-chartjs-2";
+import {TDay} from "../../facility/week-data/week-data.interfaces";
 
 import "./line-graph.scss";
 
+interface Props {
+    labels: string[]
+    data: { day: TDay, data: number[] }
+    maxPersonCount: number
+}
+
 class LineGraph extends Component {
 
-    render() {
-        const data: chartjs.ChartData = {
+    props!: Props;
+
+    state: { data: chartjs.ChartData, options: chartjs.ChartOptions } = {data: {}, options: {}};
+    static data: { data: chartjs.ChartData, options: chartjs.ChartOptions } = {
+        data: {
             labels: [
                 "10:30", "10:00", "10:30", "10:00",
                 "10:30", "10:00", "10:30", "10:00",
@@ -25,11 +35,13 @@ class LineGraph extends Component {
                     borderColor: "#1f7166"
                 }
             ]
-        };
-
-        const options: chartjs.ChartOptions = {
+        },
+        options: {
             responsive: true,
             maintainAspectRatio: false,
+            legend: {
+                display: false
+            },
             scales: {
                 yAxes: [{
                     scaleLabel: {
@@ -61,12 +73,22 @@ class LineGraph extends Component {
                     }
                 }]
             }
-        };
+        }
+    };
+
+    static getDerivedStateFromProps(newProps: Props, _: any) {
+        const copy = {...LineGraph.data};
+        console.log(newProps);
+        return copy;
+    }
+
+    render() {
 
         return (
-            <article className="line-graph-container">
-                <Line data={data} options={options}/>
-            </article>
+            <div className="line-graph-container text-center">
+                <h2 className="line-graph-heading">Montag</h2>
+                <Line data={this.state.data} options={this.state.options}/>
+            </div>
         );
     }
 }

@@ -1,12 +1,14 @@
+import * as chartjs from "chart.js";
 import React, {Component} from "react";
 import {Bar as ChartBar} from "react-chartjs-2";
-import * as chartjs from "chart.js";
 
 import "./bar-graph.scss";
 
 interface Props {
     maxPersonCount: number
     value: number;
+    color: string
+    borderColor: string
 }
 
 export default class BarGraph extends Component {
@@ -19,20 +21,16 @@ export default class BarGraph extends Component {
                 {
                     label: "Prozent",
                     yAxisID: "percent",
-                    backgroundColor: "rgb(255,153,0)",
-                    hoverBackgroundColor: "rgb(255,153,0)",
-                    borderColor: "rgb(236,134,9)",
-                    hoverBorderColor: "rgb(236,134,9)",
+                    backgroundColor: "rgb(0,0,0)",
+                    hoverBackgroundColor: "rgb(0,0,0)",
+                    borderColor: "rgb(0,0,0)",
+                    hoverBorderColor: "rgb(0,0,0)",
                     borderWidth: 1,
                     data: [0],
                     maxBarThickness: 50,
                 }
             ]
         },
-
-        // RED rgb(205,65,65) rgb(205,65,36)
-        // GREEN rgb(129,191,46) rgb(99,154,26)
-        // ORANGE rgb(255,153,0) rgb(236,134,9)
 
         options: {
             maintainAspectRatio: false,
@@ -66,7 +64,7 @@ export default class BarGraph extends Component {
                     display: true,
                     ticks: {
                         min: 0,
-                        max: 50,
+                        max: 0,
                         stepSize: 5
                     }
                 }]
@@ -79,14 +77,23 @@ export default class BarGraph extends Component {
 
     static getDerivedStateFromProps(newProps: Props, _: any) {
         const copy = {...BarGraph.data};
+
+        // Update data
         copy.data.datasets[0].data = [Math.floor(newProps.value)];
         copy.options.scales.yAxes[1].ticks.max = newProps.maxPersonCount;
+
+        // Update color
+        copy.data.datasets[0].backgroundColor = newProps.color;
+        copy.data.datasets[0].hoverBackgroundColor = newProps.color;
+        copy.data.datasets[0].borderColor = newProps.borderColor;
+        copy.data.datasets[0].hoverBorderColor = newProps.borderColor;
+
         return copy;
     }
 
     render() {
         return (
-            <div className="center">
+            <div className="text-center">
                 <article className="bar">
                     <ChartBar data={this.state.data} options={this.state.options}/>
                 </article>

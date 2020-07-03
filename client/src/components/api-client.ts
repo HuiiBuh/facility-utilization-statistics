@@ -114,5 +114,6 @@ export default class APIClient {
      */
     private static handleError(error: any): void {
         console.error(error);
+        //TODO Alert
     }
 }

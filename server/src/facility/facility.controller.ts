@@ -5,8 +5,8 @@ import {Request} from "express";
 import {ICurrent, IHour, TDataType, TFacility, TWeek, TYear} from "src/storage";
 
 import {CheckFacility} from "./facility.decorators";
-import {StorageService} from "./storage.service";
 import {IFile} from "./facility.interfaces";
+import {StorageService} from "./storage.service";
 
 @Controller("api/facility")
 export class FacilityController {
@@ -46,7 +46,7 @@ export class FacilityController {
      * Get the capacity for every hour of the day
      * @param facility
      */
-    @Get(":facility/day")
+    @Get(":facility/today")
     @CheckFacility
     getDay(@Param("facility") facility: TFacility): IHour[] {
         return this.storageService.getDay(facility);

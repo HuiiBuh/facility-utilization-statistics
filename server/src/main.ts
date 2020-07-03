@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { INestApplication } from '@nestjs/common';
+import {INestApplication} from "@nestjs/common";
+import {NestFactory} from "@nestjs/core";
+import {AppModule} from "./app.module";
 
 async function bootstrap(port: number): Promise<void> {
     const app: INestApplication = await NestFactory.create(AppModule);
@@ -8,5 +8,5 @@ async function bootstrap(port: number): Promise<void> {
 }
 
 bootstrap(3500).then(() => {
-    console.log(`\x1b[32m Visit\x1b[30m http://localhost:3000 \n\n`);
+    console.log(`\x1b[32m Visit\x1b[30m http://localhost:3500 \n\n`);
 });

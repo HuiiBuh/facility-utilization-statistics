@@ -4,6 +4,11 @@
   flex-direction: column;
 }
 
+.full-width {
+  width: 100%;
+  overflow: hidden;
+}
+
 .diagram-outlet {
   flex-grow: 1;
   align-items: center;
