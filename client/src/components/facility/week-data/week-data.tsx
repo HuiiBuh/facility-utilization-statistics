@@ -18,6 +18,9 @@ export default class WeekData extends React.Component {
 
     private static apiClient: APIClient = new APIClient("/api/facility/");
 
+    startHour: number = 10;
+    endHour: number = 22;
+
     props!: Props;
     state!: State;
 
@@ -40,24 +43,29 @@ export default class WeekData extends React.Component {
     async updateComponent(): Promise<void> {
         const response: TWeek = await WeekData.apiClient.get(`${this.props.facility}/${this.props.scope}`);
 
-        const newState: State = WeekData.makeResponseChartCompatible(response);
-        console.log(newState);
+        const newState: State = this.makeResponseChartCompatible(response);
         this.setState(newState);
 
     }
 
-    private static makeResponseChartCompatible(response: TWeek): State {
+
+    private makeResponseChartCompatible(response: TWeek): State {
         const convertedResponse: { day: TDay, data: IHour[] }[] = WeekData.sortDays(response.data) as { day: TDay, data: IHour[] }[];
 
         const dataList: { day: TDay, data: number[] }[] = [];
+
         convertedResponse.forEach((day: { day: TDay, data: IHour[] }) => {
             const dayObject: { day: TDay, data: number[] } = {
-                day: day.day, data: []
+                day: day.day,
+                data: []
             };
-            for (let hourObject of day.data) {
+
+            for (let i = this.startHour - 1; i < this.endHour - 1; ++i) {
+                const hourObject: IHour = day.data[i];
                 dayObject.data.push(hourObject.firstHalf.value);
                 dayObject.data.push(hourObject.secondHalf.value);
             }
+
             dataList.push(dayObject);
         });
 
@@ -95,27 +103,39 @@ export default class WeekData extends React.Component {
         return orderedData;
     }
 
+    private createLabel(length: number): string[] {
+
+        const labelList: string[] = [];
+
+        for (let i = this.startHour; i <= this.endHour; ++i) {
+            labelList.push(i.toString().padStart(0) + ":00");
+            labelList.push(i.toString().padStart(0) + ":30");
+        }
+
+        return labelList;
+    }
+
 
     render() {
 
         if (!this.state)
             return <div/>;
 
-        const labels = [""];
+        const labels: string[] = this.createLabel(this.state.data.length);
+        const dayList: any[] = [];
 
-        const dayList = [];
-        let day: { day: TDay, data: number[] };
-        for (day of this.state.data) {
+        this.state.data.forEach((day: { day: TDay, data: number[] }, index) => {
             dayList.push(
-                <div className="full-width">
+                <div className="full-width" key={index}>
                     <LineGraph labels={labels} maxPersonCount={this.state.maxPersonCount} data={day}/>
                 </div>
             );
-        }
+        });
 
         return <div className="full-width">
             {dayList}
         </div>;
     }
+
 
 }

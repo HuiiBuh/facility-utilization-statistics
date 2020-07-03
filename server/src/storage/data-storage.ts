@@ -323,9 +323,12 @@ export default class DataStorage {
         return this._data.current;
     }
 
-    extractDay(): Array<IHour> {
+    extractDay(): { maxPersonCount: number, data: Array<IHour> } {
         const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
-        return this._data.year[keys.year][keys.week].data[keys.day];
+        return {
+            maxPersonCount: this._data.year[keys.year][keys.week].maxPersonCount,
+            data: this._data.year[keys.year][keys.week].data[keys.day]
+        };
     }
 
     extractWeek(): TWeek {

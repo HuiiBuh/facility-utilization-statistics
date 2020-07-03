@@ -15,8 +15,9 @@ class LineGraph extends Component {
 
     props!: Props;
 
-    state: { data: chartjs.ChartData, options: chartjs.ChartOptions } = {data: {}, options: {}};
-    static data: { data: chartjs.ChartData, options: chartjs.ChartOptions } = {
+    state: { data: chartjs.ChartData, options: chartjs.ChartOptions, day: string } = {data: {}, options: {}, day: ""};
+    static data = {
+        day: "",
         data: {
             labels: [
                 "10:30", "10:00", "10:30", "10:00",
@@ -78,7 +79,11 @@ class LineGraph extends Component {
 
     static getDerivedStateFromProps(newProps: Props, _: any) {
         const copy = {...LineGraph.data};
-        console.log(newProps);
+
+        copy.data.labels = newProps.labels;
+        copy.data.datasets[0].data = newProps.data.data;
+        copy.day = newProps.data.day;
+
         return copy;
     }
 
@@ -86,8 +91,10 @@ class LineGraph extends Component {
 
         return (
             <div className="line-graph-container text-center">
-                <h2 className="line-graph-heading">Montag</h2>
-                <Line data={this.state.data} options={this.state.options}/>
+                <h2 className="line-graph-heading">{this.state.day}</h2>
+                <div>
+                    <Line data={this.state.data} options={this.state.options}/>
+                </div>
             </div>
         );
     }

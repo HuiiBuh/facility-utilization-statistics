@@ -17,7 +17,7 @@ export class StorageService {
         return this.dataCrawler[facility].extractCurrent();
     }
 
-    getDay(facility: TFacility): IHour[] {
+    getDay(facility: TFacility): { maxPersonCount: number, data: Array<IHour> } {
         return this.dataCrawler[facility].extractDay();
     }
 

@@ -1,6 +1,7 @@
 import React from "react";
 import APIClient from "../../api-client";
-import {BarGraph, LineGraph} from "../../graphs";
+import {BarGraph} from "../../graphs";
+import {IHour} from "../week-data/week-data.interfaces";
 
 interface State {
     maxPersonCount: number
@@ -48,6 +49,9 @@ export default class Current extends React.Component {
      * Update the component with the most recent data from the server
      */
     async updateComponent(): Promise<void> {
+        const day: { maxPersonCount: number, data: Array<IHour> } = await Current.apiClient.get(`${this.props.facility}/today`);
+        //TODO extract day data
+
         const response: State = await Current.apiClient.get(`${this.props.facility}/current`);
         if (response.value < 50) {
             response.color = "rgb(99,154,26)";

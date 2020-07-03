@@ -48,7 +48,7 @@ export class FacilityController {
      */
     @Get(":facility/today")
     @CheckFacility
-    getDay(@Param("facility") facility: TFacility): IHour[] {
+    getDay(@Param("facility") facility: TFacility): { maxPersonCount: number, data: Array<IHour> } {
         return this.storageService.getDay(facility);
     }
 
