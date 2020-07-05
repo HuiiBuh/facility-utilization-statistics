@@ -1,4 +1,4 @@
-export type TDay = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+export type TDay = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
 
 export interface IStorageAccessKeys {
     day: TDay;
@@ -23,9 +23,19 @@ export interface ICurrent {
     maxPersonCount: number;
 }
 
-export type TFacility = 'bloeckle' | 'kletterbox';
+export type TFacility = "bloeckle" | "kletterbox";
 
 export type THour = Array<IHour>;
 export type TWeek = { data: Record<TDay, THour>; maxPersonCount: number };
 export type TYear = Array<TWeek>;
 export type TDataType = { current: ICurrent; year: Record<number, TYear> };
+
+export interface ChartWeek {
+    data: {
+        day: TDay;
+        data: number[];
+        open: number;
+        close: number;
+    }[];
+    maxPersonCount: number;
+}

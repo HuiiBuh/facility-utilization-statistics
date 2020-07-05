@@ -1,5 +1,5 @@
-import { NotFoundException } from '@nestjs/common';
-import { Controller } from '@nestjs/common/interfaces';
+import {NotFoundException} from '@nestjs/common';
+import {Controller} from '@nestjs/common/interfaces';
 
 export function CheckFacility(
     target: Controller,

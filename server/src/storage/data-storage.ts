@@ -1,9 +1,11 @@
 import * as fs from "fs";
+import {TOpeningHours} from "src/config";
 import jsonSchema from "src/storage/json.schema";
 import * as tv4 from "tv4";
 import {sleep} from "./functions";
 
 import {
+    ChartWeek,
     ICurrent,
     IDataObject,
     IHour,
@@ -20,14 +22,9 @@ import {
  */
 export default class DataStorage {
     private fileName: string;
+    private openingHours: TOpeningHours;
 
-    private _data: TDataType = {
-        current: {
-            maxPersonCount: 0,
-            value: 0,
-        },
-        year: {},
-    };
+    private _data: TDataType = {current: {maxPersonCount: 0, value: 0}, year: {}};
     private _saveData: boolean = false;
 
     public JSONSchema = jsonSchema;
@@ -38,10 +35,12 @@ export default class DataStorage {
      * Create a new DataStorage. To use the autosave feature set saveData to true
      * @param maxPersonCount The maximal person count the percentage refers to. Will be updated weekly
      * @param fileName The filename the data will be saved
+     * @param openingHours The opening hours of the facility
      */
-    constructor(maxPersonCount: number, fileName = "data.json") {
+    constructor(maxPersonCount: number, fileName: string, openingHours: TOpeningHours) {
         this.fileName = fileName;
         this.maxPersonCount = maxPersonCount;
+        this.openingHours = openingHours;
     }
 
     /**
@@ -225,8 +224,8 @@ export default class DataStorage {
         if (firstHalf) dataObject = this._data.year[year][week].data[day][hour].firstHalf;
         else dataObject = this._data.year[year][week].data[day][hour].secondHalf;
 
-        dataObject.value =
-            (dataObject.value * dataObject.valueCount + data * dataWeight) / (dataObject.valueCount + dataWeight);
+        dataObject.value = (dataObject.value * dataObject.valueCount + data * dataWeight) /
+            (dataObject.valueCount + dataWeight);
         dataObject.valueCount += dataWeight;
     }
 
@@ -266,20 +265,14 @@ export default class DataStorage {
      */
     private static initDays(weekObject: TWeek): Record<TDay, THour> {
         const weekList: Record<TDay, THour> = weekObject.data;
+
         for (const day in weekList) {
             if (!weekList.hasOwnProperty(day)) continue;
 
-            weekList[day] = new Array<IHour>(24);
             for (let hour = 0; hour < 24; ++hour) {
                 weekList[day][hour] = {
-                    firstHalf: {
-                        value: 0,
-                        valueCount: 0,
-                    },
-                    secondHalf: {
-                        value: 0,
-                        valueCount: 0,
-                    },
+                    firstHalf: {value: 0, valueCount: 0,},
+                    secondHalf: {value: 0, valueCount: 0,},
                 };
             }
         }
@@ -295,7 +288,7 @@ export default class DataStorage {
                 weekday: "long",
             }) as TDay,
             year: currentDate.getFullYear(),
-            week: DataStorage.getWeek() - 1,
+            week: DataStorage.getWeek(),
             hour: currentDate.getHours(),
             firstHalf: currentDate.getMinutes() < 30,
         };
@@ -323,20 +316,20 @@ export default class DataStorage {
         return this._data.current;
     }
 
-    extractDay(): { maxPersonCount: number, data: Array<IHour> } {
+    extractDay(): { maxPersonCount: number; data: Array<IHour> } {
         const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
         return {
             maxPersonCount: this._data.year[keys.year][keys.week].maxPersonCount,
-            data: this._data.year[keys.year][keys.week].data[keys.day]
+            data: this._data.year[keys.year][keys.week].data[keys.day],
         };
     }
 
-    extractWeek(): TWeek {
+    extractWeek(): ChartWeek {
         const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
-        return this._data.year[keys.year][keys.week];
+        return this.makeResponseChartCompatible(this._data.year[keys.year][keys.week]);
     }
 
-    extractEstimation(): TWeek {
+    extractEstimation(): ChartWeek {
         const {year, week} = DataStorage.getJSONKeys();
 
         const weekObject: TWeek = DataStorage.initWeek(this._data.year[year][week].maxPersonCount);
@@ -367,8 +360,7 @@ export default class DataStorage {
                 });
             }
         }
-
-        return weekObject;
+        return this.makeResponseChartCompatible(weekObject);
     }
 
     extractMonth(): TWeek[] {
@@ -379,14 +371,75 @@ export default class DataStorage {
             month.push(this._data.year[year][week - i]);
         }
         //TODO Make the month only a list of weeks with days
-
         return month;
     }
 
     extractYear(): TYear {
         const {year} = DataStorage.getJSONKeys();
         //TODO Make the year only a list of months with weeks
-
         return this._data.year[year];
+    }
+
+    /******************************************************************************************************************/
+
+    private makeResponseChartCompatible(response: TWeek): ChartWeek {
+        const convertedResponse: { day: TDay; data: IHour[] }[] = DataStorage.sortDays(response.data) as {
+            day: TDay;
+            data: IHour[];
+        }[];
+
+        const dataList: { day: TDay; data: number[], open: number, close: number }[] = [];
+
+        convertedResponse.forEach((day: { day: TDay; data: IHour[] }) => {
+
+            const {open, close} = this.openingHours[day.day];
+            const dayObject = {
+                day: day.day,
+                data: [],
+                open: open,
+                close: close
+            };
+
+            for (let i = open; i < close; ++i) {
+                const hourObject: IHour = day.data[i];
+                dayObject.data.push(hourObject.firstHalf.value);
+                dayObject.data.push(hourObject.secondHalf.value);
+            }
+
+            dataList.push(dayObject);
+        });
+
+        return {
+            data: dataList,
+            maxPersonCount: response.maxPersonCount,
+        };
+    }
+
+    private static sortDays(dayList: Record<TDay, IHour[]>): { day: TDay; data: any }[] {
+        const sorter: Record<TDay, number> = {
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6,
+            Sunday: 7,
+        };
+
+        const orderedData: { day: TDay; data: any }[] = new Array(7);
+        let day: TDay;
+        for (day in dayList) {
+            if (!dayList.hasOwnProperty(day)) continue;
+
+            const index = sorter[day];
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            orderedData[index] = {};
+            orderedData[index].day = day;
+            orderedData[index].data = dayList[day];
+        }
+
+        return orderedData;
     }
 }

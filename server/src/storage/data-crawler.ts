@@ -1,15 +1,19 @@
-import ApiClient from "src/app.request.maker";
-import DataStorage from "src/storage/data-storage";
-import {sleep} from "./functions";
+import ApiClient from 'src/app.request.maker';
+import Config from 'src/config';
+import DataStorage from 'src/storage/data-storage';
+import {sleep} from './functions';
 
 export default class DataCrawler {
-    private static bloeckleURL =
-        "https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined";
-    public bloeckle = new DataStorage(50, "db/bloeckle.json");
-
-    private static kletterboxURL =
-        "https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM";
-    public kletterbox = new DataStorage(30, "db/kletterbox.json");
+    public bloeckle = new DataStorage(
+        Config.bloeckle.maxPersonCount,
+        Config.bloeckle.fileName,
+        Config.bloeckle.openingHours,
+    );
+    public kletterbox = new DataStorage(
+        Config.kletterbox.maxPersonCount,
+        Config.kletterbox.fileName,
+        Config.kletterbox.openingHours,
+    );
 
     private static INSTANCE: DataCrawler = null;
 
@@ -28,8 +32,8 @@ export default class DataCrawler {
      * Load the databases from the files
      */
     public async loadDataFromFile(): Promise<void> {
-        await this.bloeckle.loadFromFile().catch(e => console.log("Could not load the bloeckle database.\n", e));
-        await this.kletterbox.loadFromFile().catch(e => console.log("Could not load the kletterbox database.\n", e));
+        await this.bloeckle.loadFromFile().catch(e => console.log('Could not load the bloeckle database.\n', e));
+        await this.kletterbox.loadFromFile().catch(e => console.log('Could not load the kletterbox database.\n', e));
     }
 
     /**
@@ -61,10 +65,10 @@ export default class DataCrawler {
      */
     public startCrawlingData(): void {
         this.loadBloeckleData().then(() => {
-            console.log("Bloeckle crawling stopped");
+            console.log('Bloeckle crawling stopped');
         });
         this.loadKletterboxData().then(() => {
-            console.log("Kletterbox crawling stopped");
+            console.log('Kletterbox crawling stopped');
         });
     }
 
@@ -74,10 +78,8 @@ export default class DataCrawler {
     private async loadBloeckleData(): Promise<void> {
         const apiClient = new ApiClient();
         while (true) {
-            let response: string | void = await apiClient
-                .get(DataCrawler.bloeckleURL)
-                .catch(error => console.log(error));
-            if (!response) response = "";
+            let response: string | void = await apiClient.get(Config.bloeckle.url).catch(error => console.log(error));
+            if (!response) response = '';
 
             try {
                 this.bloeckle.setInformation(DataCrawler.extractBloeckleData(response));
@@ -98,7 +100,7 @@ export default class DataCrawler {
         const startMatch: RegExpExecArray = startRegex.exec(data);
         const startIndex: number = startMatch.index + startMatch[0].length;
 
-        const endRegex = new RegExp("% *;");
+        const endRegex = new RegExp('% *;');
         const endMatch: RegExpExecArray = endRegex.exec(data);
         const endIndex = endMatch.index;
 
@@ -112,10 +114,8 @@ export default class DataCrawler {
     private async loadKletterboxData(): Promise<void> {
         const apiClient = new ApiClient();
         while (true) {
-            let response: string | void = await apiClient
-                .get(DataCrawler.kletterboxURL)
-                .catch(error => console.log(error));
-            if (!response) response = "";
+            let response: string | void = await apiClient.get(Config.kletterbox.url).catch(error => console.log(error));
+            if (!response) response = '';
 
             try {
                 this.kletterbox.setInformation(DataCrawler.extractKletterboxData(response));
@@ -132,7 +132,7 @@ export default class DataCrawler {
      * @returns The blocked percentage
      */
     private static extractKletterboxData(data: string): number {
-        const startRegex = new RegExp(`<span data-value="`, "g");
+        const startRegex = new RegExp(`<span data-value="`, 'g');
 
         const startMatchOne: RegExpExecArray = startRegex.exec(data);
         const startIndexOne: number = startMatchOne.index + startMatchOne[0].length;
@@ -140,7 +140,7 @@ export default class DataCrawler {
         const startMatchTwo: RegExpExecArray = startRegex.exec(data);
         const startIndexTwo: number = startMatchTwo.index + startMatchTwo[0].length;
 
-        const endRegex = new RegExp("\">[0-9]*</span>", "g");
+        const endRegex = new RegExp('">[0-9]*</span>', 'g');
         const endIndexOne: number = endRegex.exec(data).index;
         const endIndexTwo: number = endRegex.exec(data).index;
 
