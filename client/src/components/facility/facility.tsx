@@ -2,9 +2,9 @@ import React from "react";
 import {NavLink, Route, Switch} from "react-router-dom";
 import {RoundButton} from "../index";
 import Current from "./current/current";
-import WeekData from "./week-data/week-data";
 
 import "./facility.scss";
+import WeekData from "./week-data/week-data";
 
 type TStateString = "current" | "estimation" | "month" | "year" | "week"
 
@@ -43,6 +43,8 @@ export default class Facility extends React.Component {
 
         if (path in this.state) {
             this.updateActiveButton(path)();
+        } else {
+            this.updateActiveButton("current");
         }
     }
 
@@ -79,7 +81,7 @@ export default class Facility extends React.Component {
                 <div className="text-center">
                     <div className="select-time">
 
-                        <NavLink to={`/facility/${this.props.facility}/current`} exact tabIndex={-1}
+                        <NavLink to={`/facility/${this.props.facility}`} exact tabIndex={-1}
                                  onClick={this.updateActiveButton("current")}
                                  onKeyPress={this.onEnter("current")}>
                             <RoundButton isSmall={true}
@@ -126,7 +128,7 @@ export default class Facility extends React.Component {
 
                     <Switch>
 
-                        <Route path={`/facility/${this.props.facility}/current`} exact>
+                        <Route path={`/facility/${this.props.facility}/`} exact>
                             <Current facility={this.props.facility}/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/week`} exact>

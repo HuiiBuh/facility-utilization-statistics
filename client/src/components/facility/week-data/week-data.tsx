@@ -1,7 +1,7 @@
 import React from "react";
 import APIClient from "../../api-client";
 import {LineGraph} from "../../graphs";
-import {IHour, TDay, TWeek} from "./week-data.interfaces";
+import {ChartWeek} from "./week-data.interfaces";
 
 
 interface Props {
@@ -9,9 +9,7 @@ interface Props {
     scope: "estimation" | "week" | "year"
 }
 
-interface State {
-    data: { day: TDay, data: number[] }[]
-    maxPersonCount: number
+interface State extends ChartWeek {
 }
 
 export default class WeekData extends React.Component {
@@ -41,73 +39,15 @@ export default class WeekData extends React.Component {
     }
 
     async updateComponent(): Promise<void> {
-        const response: TWeek = await WeekData.apiClient.get(`${this.props.facility}/${this.props.scope}`);
-
-        const newState: State = this.makeResponseChartCompatible(response);
-        this.setState(newState);
-
+        const response: any = await WeekData.apiClient.get(`${this.props.facility}/${this.props.scope}`);
+        this.setState(response);
     }
 
 
-    private makeResponseChartCompatible(response: TWeek): State {
-        const convertedResponse: { day: TDay, data: IHour[] }[] = WeekData.sortDays(response.data) as { day: TDay, data: IHour[] }[];
-
-        const dataList: { day: TDay, data: number[] }[] = [];
-
-        convertedResponse.forEach((day: { day: TDay, data: IHour[] }) => {
-            const dayObject: { day: TDay, data: number[] } = {
-                day: day.day,
-                data: []
-            };
-
-            for (let i = this.startHour - 1; i < this.endHour - 1; ++i) {
-                const hourObject: IHour = day.data[i];
-                dayObject.data.push(hourObject.firstHalf.value);
-                dayObject.data.push(hourObject.secondHalf.value);
-            }
-
-            dataList.push(dayObject);
-        });
-
-        return {
-            data: dataList,
-            maxPersonCount: response.maxPersonCount
-        };
-
-    }
-
-    private static sortDays(dayList: Record<TDay, IHour[]>): { day: TDay, data: any }[] {
-        const sorter: Record<TDay, number> = {
-            "Monday": 1,
-            "Tuesday": 2,
-            "Wednesday": 3,
-            "Thursday": 4,
-            "Friday": 5,
-            "Saturday": 6,
-            "Sunday": 7
-        };
-
-        const orderedData: { day: TDay, data: any }[] = new Array(7);
-        let day: TDay;
-        for (day in dayList) {
-            if (!dayList.hasOwnProperty(day)) continue;
-
-            const index = sorter[day];
-
-            // @ts-ignore
-            orderedData[index] = {};
-            orderedData[index].day = day;
-            orderedData[index].data = dayList[day];
-        }
-
-        return orderedData;
-    }
-
-    private createLabel(length: number): string[] {
-
+    private static createLabel(length: number, openHour: number, closeHour: number): string[] {
         const labelList: string[] = [];
 
-        for (let i = this.startHour; i <= this.endHour; ++i) {
+        for (let i = openHour; i <= closeHour; ++i) {
             labelList.push(i.toString().padStart(0) + ":00");
             labelList.push(i.toString().padStart(0) + ":30");
         }
@@ -121,10 +61,11 @@ export default class WeekData extends React.Component {
         if (!this.state)
             return <div/>;
 
-        const labels: string[] = this.createLabel(this.state.data.length);
         const dayList: any[] = [];
 
-        this.state.data.forEach((day: { day: TDay, data: number[] }, index) => {
+        this.state.data.forEach((day, index) => {
+            const labels: string[] = WeekData.createLabel(day.data.length, day.open, day.close);
+
             dayList.push(
                 <div className="full-width" key={index}>
                     <LineGraph labels={labels} maxPersonCount={this.state.maxPersonCount} data={day}/>

@@ -1,8 +1,8 @@
 import React from "react";
 import {NavLink} from "react-router-dom";
+import climbingImage from "../../images/climbing.svg";
 
 import "./sidenav.scss";
-import climbingImage from "../../images/climbing.svg";
 
 interface State {
     hidden: boolean
@@ -44,11 +44,13 @@ export default class Sidenav extends React.Component {
 
                     <hr className="divider"/>
 
-                    <NavLink to="/facility/bloeckle/current" className="menu-entry" activeClassName="nav-active">
+                    <NavLink to="/facility/bloeckle/" exact={false} className="menu-entry"
+                             activeClassName="nav-active">
                         <h2>Blöckle</h2>
                     </NavLink>
 
-                    <NavLink to="/facility/kletterbox/current" className="menu-entry" activeClassName="nav-active">
+                    <NavLink to="/facility/kletterbox/" exact={false} className="menu-entry"
+                             activeClassName="nav-active">
                         <h2>Kletterbox</h2>
                     </NavLink>
 

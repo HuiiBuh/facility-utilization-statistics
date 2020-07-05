@@ -11,6 +11,7 @@
     "@types/react": "^16.9.38",
     "@types/react-dom": "^16.9.8",
     "chart.js": "^2.9.3",
+    "deep-equal": "^2.0.3",
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
     "react-chartjs-2": "^2.9.0",
@@ -20,7 +21,7 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@types/chart.js": "^2.9.22",
+    "@types/deep-equal": "^1.0.1",
     "@types/react-router-dom": "^5.1.5"
   }
 }

@@ -1,4 +1,3 @@
-import * as chartjs from "chart.js";
 import React, {Component} from "react";
 import {Line} from "react-chartjs-2";
 import {TDay} from "../../facility/week-data/week-data.interfaces";
@@ -15,21 +14,14 @@ class LineGraph extends Component {
 
     props!: Props;
 
-    state: { data: chartjs.ChartData, options: chartjs.ChartOptions, day: string } = {data: {}, options: {}, day: ""};
     static data = {
         day: "",
         data: {
-            labels: [
-                "10:30", "10:00", "10:30", "10:00",
-                "10:30", "10:00", "10:30", "10:00",
-                "10:30", "10:00", "10:30", "10:00",
-                "10:30", "10:00", "10:30", "10:00",
-                "10:30", "10:00", "10:30", "10:00",
-            ],
+            labels: [""],
             datasets: [
                 {
                     label: "Anzahl Personen",
-                    data: [22, 19, 27, 23, 22, 24, 17, 25, 23, 24, 20, 19, 22, 19, 27, 23, 22, 24, 17, 25, 23, 24, 20, 19],
+                    data: [0],
                     fill: true,
                     borderWidth: 2,
                     backgroundColor: "#2b998a",
@@ -77,23 +69,18 @@ class LineGraph extends Component {
         }
     };
 
-    static getDerivedStateFromProps(newProps: Props, _: any) {
-        const copy = {...LineGraph.data};
-
-        copy.data.labels = newProps.labels;
-        copy.data.datasets[0].data = newProps.data.data;
-        copy.day = newProps.data.day;
-
-        return copy;
-    }
-
     render() {
+        const copy = JSON.parse(JSON.stringify(LineGraph.data));
+        copy.data.labels = this.props.labels;
+        copy.data.datasets[0].data = this.props.data.data;
+        copy.options.scales.yAxes[0].ticks.max = this.props.maxPersonCount;
+        copy.day = this.props.data.day;
 
         return (
             <div className="line-graph-container text-center">
-                <h2 className="line-graph-heading">{this.state.day}</h2>
+                <h2 className="line-graph-heading">{this.props.data.day}</h2>
                 <div>
-                    <Line data={this.state.data} options={this.state.options}/>
+                    <Line data={copy.data} options={copy.options}/>
                 </div>
             </div>
         );

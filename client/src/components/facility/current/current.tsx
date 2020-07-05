@@ -50,7 +50,6 @@ export default class Current extends React.Component {
      */
     async updateComponent(): Promise<void> {
         const day: { maxPersonCount: number, data: Array<IHour> } = await Current.apiClient.get(`${this.props.facility}/today`);
-        //TODO extract day data
 
         const response: State = await Current.apiClient.get(`${this.props.facility}/current`);
         if (response.value < 50) {

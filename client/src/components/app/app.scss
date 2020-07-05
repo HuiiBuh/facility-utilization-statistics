@@ -6,7 +6,7 @@ $left-width: 300px;
   width: 100vw;
   position: relative;
 
-  .header, .left, {
+  .left, {
     overflow: hidden;
   }
 }
@@ -27,7 +27,6 @@ $left-width: 300px;
   align-items: center;
 
   height: $navbar-height;
-  width: calc(100vw - #{$left-width});
 
   position: relative;
 

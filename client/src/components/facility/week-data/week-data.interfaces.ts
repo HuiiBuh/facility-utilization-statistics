@@ -21,3 +21,12 @@ export type TYear = Array<TWeek>;
 export type TDataType = { current: ICurrent; year: Record<number, TYear> };
 
 
+export interface ChartWeek {
+    data: {
+        day: TDay;
+        data: number[];
+        open: number;
+        close: number;
+    }[];
+    maxPersonCount: number;
+}
