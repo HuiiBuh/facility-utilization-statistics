@@ -3,11 +3,18 @@ import APIClient from "../../api-client";
 import {BarGraph} from "../../graphs";
 import {IHour} from "../week-data/week-data.interfaces";
 
-interface State {
+interface ICurrent {
     maxPersonCount: number
     value: number
     color: string
-    borderColor: string
+    borderColor: string;
+
+}
+
+interface State {
+    day: { maxPersonCount: number, data: Array<IHour> },
+    current: ICurrent
+
 }
 
 interface Props {
@@ -51,7 +58,16 @@ export default class Current extends React.Component {
     async updateComponent(): Promise<void> {
         const day: { maxPersonCount: number, data: Array<IHour> } = await Current.apiClient.get(`${this.props.facility}/today`);
 
-        const response: State = await Current.apiClient.get(`${this.props.facility}/current`);
+        const response: ICurrent = await Current.apiClient.get(`${this.props.facility}/current`);
+        Current.updateColor(response);
+
+        const newState: State = {current: response, day: day};
+
+
+        this.setState(newState);
+    }
+
+    private static updateColor(response: ICurrent) {
         if (response.value < 50) {
             response.color = "rgb(99,154,26)";
             response.borderColor = "rgb(99,154,26)";
@@ -62,8 +78,6 @@ export default class Current extends React.Component {
             response.color = "rgb(205,65,65)";
             response.borderColor = "rgb(205,65,36)";
         }
-
-        this.setState(response);
     }
 
     render() {
@@ -73,9 +87,9 @@ export default class Current extends React.Component {
             return <div/>;
 
         return <div className="full-width">
-            <BarGraph maxPersonCount={this.state.maxPersonCount} value={this.state.value}
-                      borderColor={this.state.borderColor} color={this.state.color}/>
-            {/*<LineGraph/>*/}
+            <BarGraph maxPersonCount={this.state.current.maxPersonCount} value={this.state.current.value}
+                      borderColor={this.state.current.borderColor} color={this.state.current.color}/>
+            {/*<LineGraph data={this.state.day.data} maxPersonCount={this.state.day.maxPersonCount} labels={[]}/>*/}
         </div>;
 
 

@@ -346,6 +346,9 @@ export default class DataStorage {
                 dayObject.forEach((hourObject: IHour, hour: number) => {
                     let data = hourObject.firstHalf.value;
                     let dataWeight = hourObject.firstHalf.valueCount;
+
+                    if (dataWeight === 0) return;
+
                     weekObject.data[day][hour].firstHalf.value =
                         (hourObject.firstHalf.value * hourObject.firstHalf.valueCount + data * dataWeight) /
                         (hourObject.firstHalf.valueCount + dataWeight);

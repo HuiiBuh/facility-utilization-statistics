@@ -84,6 +84,7 @@ export default class Facility extends React.Component {
                     <h1>{this.props.facility.charAt(0).toUpperCase() + this.props.facility.slice(1)}</h1>
                 </div>
 
+                // TODO state bei facility wechsel
                 <div className="text-center">
                     <div className="select-time">
 
