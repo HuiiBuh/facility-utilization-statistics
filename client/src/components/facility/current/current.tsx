@@ -1,7 +1,8 @@
 import React from "react";
 import APIClient from "../../api-client";
-import {BarGraph} from "../../graphs";
-import {IHour} from "../week-data/week-data.interfaces";
+import {BarGraph, LineGraph} from "../../graphs";
+import {ChartWeek} from "../week-data/week-data.interfaces";
+import {createLabel} from "../functions";
 
 interface ICurrent {
     maxPersonCount: number
@@ -12,7 +13,7 @@ interface ICurrent {
 }
 
 interface State {
-    day: { maxPersonCount: number, data: Array<IHour> },
+    day: ChartWeek,
     current: ICurrent
 
 }
@@ -56,14 +57,13 @@ export default class Current extends React.Component {
      * Update the component with the most recent data from the server
      */
     async updateComponent(): Promise<void> {
-        const day: { maxPersonCount: number, data: Array<IHour> } = await Current.apiClient.get(`${this.props.facility}/today`);
+        const day: ChartWeek = await Current.apiClient.get(`${this.props.facility}/today`);
+        console.log(day);
 
-        const response: ICurrent = await Current.apiClient.get(`${this.props.facility}/current`);
-        Current.updateColor(response);
+        const current: ICurrent = await Current.apiClient.get(`${this.props.facility}/current`);
+        Current.updateColor(current);
 
-        const newState: State = {current: response, day: day};
-
-
+        const newState: State = {current: current, day: day};
         this.setState(newState);
     }
 
@@ -82,14 +82,15 @@ export default class Current extends React.Component {
 
     render() {
 
-        //TODO loading
         if (!this.state)
             return <div/>;
+
+        const labels = createLabel(this.state.day.data.length, 10, 22);
 
         return <div className="full-width">
             <BarGraph maxPersonCount={this.state.current.maxPersonCount} value={this.state.current.value}
                       borderColor={this.state.current.borderColor} color={this.state.current.color}/>
-            {/*<LineGraph data={this.state.day.data} maxPersonCount={this.state.day.maxPersonCount} labels={[]}/>*/}
+            <LineGraph data={this.state.day.data[0]} maxPersonCount={this.state.day.maxPersonCount} labels={labels}/>
         </div>;
 
 

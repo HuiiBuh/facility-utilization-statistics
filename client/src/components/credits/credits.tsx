@@ -1,7 +1,7 @@
 import React from "react";
 
 function Credits() {
-    return <div>
+    return <div className="padding-left-right">
         <h1 className="text-center">Credits</h1>
 
 
@@ -20,7 +20,7 @@ function Credits() {
             <li>
                 jerairrest for his <a href="https://github.com/jerairrest/react-chartjs-2">React Chart.js</a> wrapper
             </li>
-            
+
             <li>
                 ReactTraining for their <a
                 href="https://github.com/ReactTraining/react-router#readme">Router</a> implementation

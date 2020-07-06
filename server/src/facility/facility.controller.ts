@@ -2,7 +2,7 @@ import {Controller, ForbiddenException, Get, Param, Post, Req, UploadedFile, Use
 import {FileInterceptor} from "@nestjs/platform-express";
 import {Request} from "express";
 
-import {ChartWeek, ICurrent, IHour, TDataType, TFacility, TWeek, TYear} from "src/storage";
+import {ChartWeek, ICurrent, TDataType, TFacility, TWeek, TYear} from "src/storage";
 
 import {CheckFacility} from "./facility.decorators";
 import {IFile} from "./facility.interfaces";
@@ -48,7 +48,7 @@ export class FacilityController {
      */
     @Get(":facility/today")
     @CheckFacility
-    getDay(@Param("facility") facility: TFacility): { maxPersonCount: number; data: Array<IHour> } {
+    getDay(@Param("facility") facility: TFacility): ChartWeek {
         return this.storageService.getDay(facility);
     }
 

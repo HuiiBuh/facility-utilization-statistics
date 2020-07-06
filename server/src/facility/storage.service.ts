@@ -1,15 +1,16 @@
-import {BadRequestException, Injectable} from '@nestjs/common';
+import {BadRequestException, Injectable} from "@nestjs/common";
 
-import {ChartWeek, DataCrawler, ICurrent, IHour, TDataType, TDay, TFacility, TWeek, TYear} from "src/storage/";
+import {ChartWeek, DataCrawler, ICurrent, TDataType, TDay, TFacility, TWeek, TYear} from "src/storage/";
 
 interface State {
-    data: {day: TDay; data: number[]}[];
+    data: { day: TDay; data: number[] }[];
     maxPersonCount: number;
 }
 
 @Injectable()
 export class StorageService {
-    constructor(private dataCrawler: DataCrawler) {}
+    constructor(private dataCrawler: DataCrawler) {
+    }
 
     async onModuleInit(): Promise<void> {
         await this.dataCrawler.loadDataFromFile();
@@ -21,7 +22,7 @@ export class StorageService {
         return this.dataCrawler[facility].extractCurrent();
     }
 
-    getDay(facility: TFacility): {maxPersonCount: number; data: Array<IHour>} {
+    getDay(facility: TFacility): ChartWeek {
         return this.dataCrawler[facility].extractDay();
     }
 
@@ -48,16 +49,16 @@ export class StorageService {
     mergeDatabase(id: TFacility, buffer: Buffer): void {
         let fileContent: TDataType;
         try {
-            const bufferString = buffer.toString('utf8');
+            const bufferString = buffer.toString("utf8");
             fileContent = JSON.parse(bufferString);
         } catch (e) {
-            throw new BadRequestException('The file could not be parsed to json');
+            throw new BadRequestException("The file could not be parsed to json");
         }
 
         try {
             this.dataCrawler[id].mergeDataBases(fileContent);
         } catch {
-            throw new BadRequestException('The json schema of your file is wrong');
+            throw new BadRequestException("The json schema of your file is wrong");
         }
     }
 

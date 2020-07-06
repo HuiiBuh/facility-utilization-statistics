@@ -17,7 +17,7 @@ body {
 
 * {
   outline: none !important;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important;
 }
 
 :root {
@@ -59,8 +59,11 @@ h1, h2, h3, h4, h5, h6, {
   margin-right: 0 !important;
 }
 
-// Input
+.padding-left-right {
+  padding: 0 1rem;
+}
 
+// Input
 input {
   box-sizing: border-box;
   padding: 0 .5rem;
@@ -117,4 +120,22 @@ select {
   background: transparent;
   border: transparent;
   outline: none;
+}
+
+// Scrollbar
+// Scrollbar
+*::-webkit-scrollbar {
+  width: 5px
+}
+
+*::-webkit-scrollbar-track {
+  background: #ddd
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #666
+}
+
+* {
+  scrollbar-width: thin !important;
 }

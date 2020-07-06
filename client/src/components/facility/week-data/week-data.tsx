@@ -2,6 +2,7 @@ import React from "react";
 import APIClient from "../../api-client";
 import {LineGraph} from "../../graphs";
 import {ChartWeek} from "./week-data.interfaces";
+import {createLabel} from "../functions";
 
 
 interface Props {
@@ -15,9 +16,6 @@ interface State extends ChartWeek {
 export default class WeekData extends React.Component {
 
     private static apiClient: APIClient = new APIClient("/api/facility/");
-
-    startHour: number = 10;
-    endHour: number = 22;
 
     props!: Props;
     state!: State;
@@ -44,18 +42,6 @@ export default class WeekData extends React.Component {
     }
 
 
-    private static createLabel(length: number, openHour: number, closeHour: number): string[] {
-        const labelList: string[] = [];
-
-        for (let i = openHour; i <= closeHour; ++i) {
-            labelList.push(i.toString().padStart(0) + ":00");
-            labelList.push(i.toString().padStart(0) + ":30");
-        }
-
-        return labelList;
-    }
-
-
     render() {
 
         if (!this.state)
@@ -64,11 +50,11 @@ export default class WeekData extends React.Component {
         const dayList: any[] = [];
 
         this.state.data.forEach((day, index) => {
-            const labels: string[] = WeekData.createLabel(day.data.length, day.open, day.close);
+            const labels: string[] = createLabel(day.data.length, day.open, day.close);
 
             dayList.push(
                 <div className="full-width" key={index}>
-                    <LineGraph labels={labels} maxPersonCount={this.state.maxPersonCount} data={day}/>
+                    <LineGraph data={day} maxPersonCount={this.state.maxPersonCount} labels={labels}/>
                 </div>
             );
         });

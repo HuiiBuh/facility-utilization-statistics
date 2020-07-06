@@ -21,23 +21,25 @@ export default class BarGraph extends Component {
                 {
                     label: "Prozent",
                     yAxisID: "percent",
+                    data: [0],
+
                     backgroundColor: "rgb(0,0,0)",
                     hoverBackgroundColor: "rgb(0,0,0)",
                     borderColor: "rgb(0,0,0)",
                     hoverBorderColor: "rgb(0,0,0)",
+
                     borderWidth: 1,
-                    data: [0],
                     maxBarThickness: 50,
                 }
             ]
         },
 
         options: {
+            responsive: true,
             maintainAspectRatio: false,
             legend: {
                 display: false
             },
-            responsive: true,
             scales: {
                 yAxes: [{
                     scaleLabel: {

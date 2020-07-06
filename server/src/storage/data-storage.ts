@@ -22,7 +22,7 @@ import {
  */
 export default class DataStorage {
     private fileName: string;
-    private openingHours: TOpeningHours;
+    private readonly openingHours: TOpeningHours;
 
     private _data: TDataType = {current: {maxPersonCount: 0, value: 0}, year: {}};
     private _saveData: boolean = false;
@@ -316,17 +316,21 @@ export default class DataStorage {
         return this._data.current;
     }
 
-    extractDay(): { maxPersonCount: number; data: Array<IHour> } {
-        const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
+    extractDay(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): ChartWeek {
+        const dayChart = this.makeDayChartCompatible({
+            day: keys.day,
+            data: this._data.year[keys.year][keys.week].data[keys.day]
+        });
+
         return {
-            maxPersonCount: this._data.year[keys.year][keys.week].maxPersonCount,
-            data: this._data.year[keys.year][keys.week].data[keys.day],
+            data: [dayChart],
+            maxPersonCount: this._data.year[keys.year][keys.week].maxPersonCount
         };
     }
 
     extractWeek(): ChartWeek {
         const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
-        return this.makeResponseChartCompatible(this._data.year[keys.year][keys.week]);
+        return this.makeWeekChartCompatible(this._data.year[keys.year][keys.week]);
     }
 
     extractEstimation(): ChartWeek {
@@ -363,7 +367,7 @@ export default class DataStorage {
                 });
             }
         }
-        return this.makeResponseChartCompatible(weekObject);
+        return this.makeWeekChartCompatible(weekObject);
     }
 
     extractMonth(): TWeek[] {
@@ -385,7 +389,7 @@ export default class DataStorage {
 
     /******************************************************************************************************************/
 
-    private makeResponseChartCompatible(response: TWeek): ChartWeek {
+    private makeWeekChartCompatible(response: TWeek): ChartWeek {
         const convertedResponse: { day: TDay; data: IHour[] }[] = DataStorage.sortDays(response.data) as {
             day: TDay;
             data: IHour[];
@@ -394,21 +398,7 @@ export default class DataStorage {
         const dataList: { day: TDay; data: number[], open: number, close: number }[] = [];
 
         convertedResponse.forEach((day: { day: TDay; data: IHour[] }) => {
-
-            const {open, close} = this.openingHours[day.day];
-            const dayObject = {
-                day: day.day,
-                data: [],
-                open: open,
-                close: close
-            };
-
-            for (let i = open; i < close; ++i) {
-                const hourObject: IHour = day.data[i];
-                dayObject.data.push(hourObject.firstHalf.value);
-                dayObject.data.push(hourObject.secondHalf.value);
-            }
-
+            const dayObject = this.makeDayChartCompatible(day);
             dataList.push(dayObject);
         });
 
@@ -416,6 +406,24 @@ export default class DataStorage {
             data: dataList,
             maxPersonCount: response.maxPersonCount,
         };
+    }
+
+    private makeDayChartCompatible(day: { day: TDay; data: IHour[] }): { data: any[]; day: TDay; close: number; open: number } {
+        const {open, close} = this.openingHours[day.day];
+        const dayObject: { data: any[]; day: TDay; close: number; open: number } = {
+            day: day.day,
+            data: [],
+            open: open,
+            close: close
+        };
+
+        for (let i = open; i < close; ++i) {
+            const hourObject: IHour = day.data[i];
+            dayObject.data.push(hourObject.firstHalf.value);
+            dayObject.data.push(hourObject.secondHalf.value);
+        }
+
+        return dayObject;
     }
 
     private static sortDays(dayList: Record<TDay, IHour[]>): { day: TDay; data: any }[] {

@@ -21,11 +21,14 @@ class LineGraph extends Component {
             datasets: [
                 {
                     label: "Anzahl Personen",
+                    yAxisID: "percent",
                     data: [0],
+
+                    backgroundColor: "#2b998a",
+                    borderColor: "#1f7166",
+
                     fill: true,
                     borderWidth: 2,
-                    backgroundColor: "#2b998a",
-                    borderColor: "#1f7166"
                 }
             ]
         },
@@ -37,18 +40,6 @@ class LineGraph extends Component {
             },
             scales: {
                 yAxes: [{
-                    scaleLabel: {
-                        labelString: "Personenanzahl",
-                        display: true,
-                    },
-                    id: "Counter",
-                    display: true,
-                    ticks: {
-                        min: 0,
-                        max: 50,
-                        stepSize: 5
-                    }
-                }, {
                     scaleLabel: {
                         labelString: "Auslastung in %",
                         display: true,
@@ -64,6 +55,18 @@ class LineGraph extends Component {
                         max: 100,
                         stepSize: 10
                     }
+                }, {
+                    scaleLabel: {
+                        labelString: "Personenanzahl",
+                        display: true,
+                    },
+                    id: "Counter",
+                    display: true,
+                    ticks: {
+                        min: 0,
+                        max: 50,
+                        stepSize: 5
+                    }
                 }]
             }
         }
@@ -73,7 +76,7 @@ class LineGraph extends Component {
         const copy = JSON.parse(JSON.stringify(LineGraph.data));
         copy.data.labels = this.props.labels;
         copy.data.datasets[0].data = this.props.data.data;
-        copy.options.scales.yAxes[0].ticks.max = this.props.maxPersonCount;
+        copy.options.scales.yAxes[1].ticks.max = this.props.maxPersonCount;
         copy.day = this.props.data.day;
 
         return (
