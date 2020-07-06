@@ -1,7 +1,7 @@
 import React from "react";
 import APIClient from "../../api-client";
 import {BarGraph, LineGraph} from "../../graphs";
-import {ChartWeek} from "../week-data/week-data.interfaces";
+import {ChartWeek} from "../multiple-days/multiple-days.interfaces";
 import {createLabel} from "../functions";
 
 interface ICurrent {
@@ -58,7 +58,6 @@ export default class Current extends React.Component {
      */
     async updateComponent(): Promise<void> {
         const day: ChartWeek = await Current.apiClient.get(`${this.props.facility}/today`);
-        console.log(day);
 
         const current: ICurrent = await Current.apiClient.get(`${this.props.facility}/current`);
         Current.updateColor(current);
@@ -81,18 +80,17 @@ export default class Current extends React.Component {
     }
 
     render() {
-
         if (!this.state)
             return <div/>;
 
-        const labels = createLabel(this.state.day.data.length, 10, 22);
+
+        const day = this.state.day.data[0];
+        const labels: string[] = createLabel(day.data.length, day.open, day.close);
 
         return <div className="full-width">
             <BarGraph maxPersonCount={this.state.current.maxPersonCount} value={this.state.current.value}
                       borderColor={this.state.current.borderColor} color={this.state.current.color}/>
-            <LineGraph data={this.state.day.data[0]} maxPersonCount={this.state.day.maxPersonCount} labels={labels}/>
+            <LineGraph data={day} maxPersonCount={this.state.day.maxPersonCount} labels={labels}/>
         </div>;
-
-
     }
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import APIClient from "../../api-client";
 import {LineGraph} from "../../graphs";
-import {ChartWeek} from "./week-data.interfaces";
+import {ChartWeek} from "./multiple-days.interfaces";
 import {createLabel} from "../functions";
 
 
@@ -13,7 +13,7 @@ interface Props {
 interface State extends ChartWeek {
 }
 
-export default class WeekData extends React.Component {
+export default class MultipleDays extends React.Component {
 
     private static apiClient: APIClient = new APIClient("/api/facility/");
 
@@ -37,7 +37,7 @@ export default class WeekData extends React.Component {
     }
 
     async updateComponent(): Promise<void> {
-        const response: any = await WeekData.apiClient.get(`${this.props.facility}/${this.props.scope}`);
+        const response: any = await MultipleDays.apiClient.get(`${this.props.facility}/${this.props.scope}`);
         this.setState(response);
     }
 

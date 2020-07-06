@@ -328,10 +328,23 @@ export default class DataStorage {
         };
     }
 
-    extractWeek(): ChartWeek {
+    extractWeek(): { data: { day: TDay; value: number }[]; maxPersonCount: number } {
         const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
-        return this.makeWeekChartCompatible(this._data.year[keys.year][keys.week]);
+        const week: TWeek = this._data.year[keys.year][keys.week];
+
+        const returnObject: { data: { day: TDay; value: number }[]; maxPersonCount: number } = {
+            maxPersonCount: week.maxPersonCount,
+            data: []
+        };
+
+        const temp: { day: TDay; data: THour }[] = DataStorage.sortDays(week.data);
+        temp.forEach(dayObject => {
+            returnObject.data.push(this.compressDay(dayObject));
+        });
+
+        return returnObject;
     }
+
 
     extractEstimation(): ChartWeek {
         const {year, week} = DataStorage.getJSONKeys();
@@ -408,6 +421,37 @@ export default class DataStorage {
         };
     }
 
+
+    compressDay(day: { day: TDay; data: IHour[] }): { day: TDay; value: number } {
+
+        const {open, close} = this.openingHours[day.day];
+
+        let valueCount = 0;
+        let dayAverage = 0;
+        for (let i = open; i < close; ++i) {
+            const hourObject: IHour = day.data[i];
+
+            if (hourObject.firstHalf.valueCount !== 0) {
+                valueCount += hourObject.firstHalf.valueCount;
+                dayAverage += hourObject.firstHalf.valueCount;
+            }
+
+            if (hourObject.secondHalf.valueCount !== 0) {
+                valueCount += hourObject.secondHalf.valueCount;
+                dayAverage += hourObject.secondHalf.valueCount;
+            }
+
+        }
+
+
+        if (valueCount === 0) return null;
+
+        return {
+            day: day.day,
+            value: dayAverage / valueCount
+        };
+    }
+
     private makeDayChartCompatible(day: { day: TDay; data: IHour[] }): { data: any[]; day: TDay; close: number; open: number } {
         const {open, close} = this.openingHours[day.day];
         const dayObject: { data: any[]; day: TDay; close: number; open: number } = {
@@ -426,7 +470,7 @@ export default class DataStorage {
         return dayObject;
     }
 
-    private static sortDays(dayList: Record<TDay, IHour[]>): { day: TDay; data: any }[] {
+    private static sortDays(dayList: Record<TDay, any>): { day: TDay; data: any }[] {
         const sorter: Record<TDay, number> = {
             Monday: 1,
             Tuesday: 2,

@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Line} from "react-chartjs-2";
-import {TDay} from "../../facility/week-data/week-data.interfaces";
+import {TDay} from "../../facility/multiple-days/multiple-days.interfaces";
 
 import "./line-graph.scss";
 
@@ -20,7 +20,7 @@ class LineGraph extends Component {
             labels: [""],
             datasets: [
                 {
-                    label: "Anzahl Personen",
+                    label: "Auslastung in %",
                     yAxisID: "percent",
                     data: [0],
 

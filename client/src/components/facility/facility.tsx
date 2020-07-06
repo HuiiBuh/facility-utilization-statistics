@@ -4,7 +4,7 @@ import {RoundButton} from "../index";
 import Current from "./current/current";
 
 import "./facility.scss";
-import WeekData from "./week-data/week-data";
+import MultipleDays from "./multiple-days/multiple-days";
 import deepEqual from "deep-equal";
 
 type TStateString = "current" | "estimation" | "month" | "year" | "week"
@@ -138,10 +138,10 @@ export default class Facility extends React.Component {
                             <Current facility={this.props.facility}/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/week`} exact>
-                            <WeekData facility={this.props.facility} scope="week"/>
+                            <MultipleDays facility={this.props.facility} scope="week"/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/estimation`} exact>
-                            <WeekData facility={this.props.facility} scope="estimation"/>
+                            <MultipleDays facility={this.props.facility} scope="estimation"/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/month`} exact>
                             <h1 className="text-center">Coming soon</h1>

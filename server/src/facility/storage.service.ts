@@ -30,7 +30,7 @@ export class StorageService {
         return this.dataCrawler[facility].extractEstimation();
     }
 
-    getWeek(facility: TFacility): ChartWeek {
+    getWeek(facility: TFacility): { data: { day: TDay; value: number }[]; maxPersonCount: number } {
         return this.dataCrawler[facility].extractWeek();
     }
 
