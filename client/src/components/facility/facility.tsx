@@ -5,6 +5,7 @@ import Current from "./current/current";
 
 import "./facility.scss";
 import WeekData from "./week-data/week-data";
+import deepEqual from "deep-equal";
 
 type TStateString = "current" | "estimation" | "month" | "year" | "week"
 
@@ -44,8 +45,13 @@ export default class Facility extends React.Component {
         if (path in this.state) {
             this.updateActiveButton(path)();
         } else {
-            this.updateActiveButton("current");
+            this.updateActiveButton("current")();
         }
+    }
+
+    componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{}>, snapshot?: any) {
+        if (deepEqual(prevProps, this.props)) return;
+        this.componentDidMount();
     }
 
 
