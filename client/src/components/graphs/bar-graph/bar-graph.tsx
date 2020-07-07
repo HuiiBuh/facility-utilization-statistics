@@ -14,7 +14,6 @@ interface Props {
 export default class BarGraph extends Component {
 
     private static data = {
-
         data: {
             labels: ["Auslastung"],
             datasets: [

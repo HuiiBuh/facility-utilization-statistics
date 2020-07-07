@@ -1,11 +1,13 @@
+import deepEqual from "deep-equal";
 import React from "react";
 import {NavLink, Route, Switch} from "react-router-dom";
+
 import {RoundButton} from "../index";
 import Current from "./current/current";
 
 import "./facility.scss";
-import MultipleDays from "./multiple-days/multiple-days";
-import deepEqual from "deep-equal";
+
+import LineGraphLoader from "./line-graph-loader/line-graph-loader";
 
 type TStateString = "current" | "estimation" | "month" | "year" | "week"
 
@@ -14,7 +16,6 @@ interface Props {
 }
 
 interface State {
-
     current: boolean
     week: boolean
     estimation: boolean
@@ -39,6 +40,9 @@ export default class Facility extends React.Component {
         this.props = props;
     }
 
+    /**
+     * Update the button when the component gets created
+     */
     componentDidMount(): void {
         const path = window.location.pathname.split("/").pop() as TStateString;
 
@@ -49,12 +53,22 @@ export default class Facility extends React.Component {
         }
     }
 
-    componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{}>, snapshot?: any) {
+    /**
+     * Check if the current view has changed
+     * @param prevProps The previous props
+     * @param _
+     * @param __
+     */
+    componentDidUpdate(prevProps: Readonly<{}>, _: Readonly<{}>, __?: any) {
         if (deepEqual(prevProps, this.props)) return;
         this.componentDidMount();
     }
 
 
+    /**
+     * Update the active button
+     * @param key The currently active button
+     */
     updateActiveButton = (key: TStateString) => {
         return (): void => {
             const stateUpdate: State = {
@@ -69,6 +83,10 @@ export default class Facility extends React.Component {
         };
     };
 
+    /**
+     * Handle enter press on the buttons
+     * @param key
+     */
     onEnter = (key: TStateString): (event: React.KeyboardEvent<HTMLAnchorElement>) => void => {
         return (event: React.KeyboardEvent<HTMLAnchorElement>): void => {
             event.key === "Enter" && this.updateActiveButton(key)();
@@ -138,10 +156,10 @@ export default class Facility extends React.Component {
                             <Current facility={this.props.facility}/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/week`} exact>
-                            <MultipleDays facility={this.props.facility} scope="week"/>
+                            <LineGraphLoader facility={this.props.facility} scope="week"/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/estimation`} exact>
-                            <MultipleDays facility={this.props.facility} scope="estimation"/>
+                            <LineGraphLoader facility={this.props.facility} scope="estimation"/>
                         </Route>
                         <Route path={`/facility/${this.props.facility}/month`} exact>
                             <h1 className="text-center">Coming soon</h1>

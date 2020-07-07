@@ -2,11 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {BrowserRouter} from "react-router-dom";
 
-import * as serviceWorker from "./service-worker";
+import {App} from "./components";
 
 import "./index.scss";
 
-import {App} from "./components";
+import * as serviceWorker from "./service-worker";
 
 ReactDOM.render(
     <React.StrictMode>

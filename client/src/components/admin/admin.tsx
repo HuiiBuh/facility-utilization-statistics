@@ -1,13 +1,20 @@
 import React from "react";
-import "./admin.scss";
 import {RoundButton} from "../";
+import "./admin.scss";
 
 export default class Admin extends React.Component {
+
+    /**
+     * Set the admin panel as visible
+     */
     componentDidMount(): void {
         localStorage.setItem("isAdmin", "true");
     }
 
-    callUploadFileDialog(event: React.MouseEvent<HTMLSpanElement>) {
+    /**
+     * Open the upload dialog
+     */
+    callUploadFileDialog(_: React.MouseEvent<HTMLSpanElement>) {
         const fileUpload = document.querySelector<HTMLInputElement>("input[type='file']");
         if (fileUpload) fileUpload.click();
     }

@@ -1,12 +1,11 @@
 import React, {Component} from "react";
 import {Line} from "react-chartjs-2";
-import {TDay} from "../../facility/multiple-days/multiple-days.interfaces";
 
 import "./line-graph.scss";
 
 interface Props {
     labels: string[]
-    data: { day: TDay, data: number[] }
+    data: number[]
     maxPersonCount: number
 }
 
@@ -75,13 +74,11 @@ class LineGraph extends Component {
     render() {
         const copy = JSON.parse(JSON.stringify(LineGraph.data));
         copy.data.labels = this.props.labels;
-        copy.data.datasets[0].data = this.props.data.data;
+        copy.data.datasets[0].data = this.props.data;
         copy.options.scales.yAxes[1].ticks.max = this.props.maxPersonCount;
-        copy.day = this.props.data.day;
 
         return (
             <div className="line-graph-container text-center">
-                <h2 className="line-graph-heading">{this.props.data.day}</h2>
                 <div>
                     <Line data={copy.data} options={copy.options}/>
                 </div>

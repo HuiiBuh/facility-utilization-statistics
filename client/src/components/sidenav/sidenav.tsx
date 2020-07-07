@@ -14,12 +14,18 @@ export default class Sidenav extends React.Component {
         hidden: true
     };
 
+    /**
+     * Hide the sidenav
+     */
     private hideSidenav = () => {
         this.setState({hidden: true});
     };
 
+    /**
+     * Show the sidenav
+     * @param event The click or keyboard event
+     */
     private showSidenav = (event: React.KeyboardEvent<HTMLSpanElement> | React.MouseEvent<HTMLSpanElement>) => {
-
         // @ts-ignore
         if (event.key !== undefined && event.key !== "Enter") return;
 
@@ -27,7 +33,6 @@ export default class Sidenav extends React.Component {
     };
 
     render() {
-
         let navClassList: string = "nav-wrapper ";
         if (!this.state.hidden) navClassList += "show-menu";
 
