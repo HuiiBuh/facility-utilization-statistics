@@ -1,6 +1,6 @@
-import {INestApplication} from '@nestjs/common';
-import {NestFactory} from '@nestjs/core';
-import {AppModule} from './app.module';
+import {INestApplication} from "@nestjs/common";
+import {NestFactory} from "@nestjs/core";
+import {AppModule} from "./app.module";
 
 async function bootstrap(port: number): Promise<void> {
     const app: INestApplication = await NestFactory.create(AppModule);

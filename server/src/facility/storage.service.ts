@@ -1,6 +1,7 @@
 import {BadRequestException, Injectable} from "@nestjs/common";
 
-import {ChartWeek, DataCrawler, ICurrent, TDataType, TDay, TFacility, TWeek, TYear} from "src/storage/";
+import {DataCrawler, ICurrent, TDay, TFacility, TStorageData, TWeek, TYear} from "src/storage/";
+import {IChartWeek, IWeekOverview} from "./facility.interfaces";
 
 interface State {
     data: { day: TDay; data: number[] }[];
@@ -22,15 +23,15 @@ export class StorageService {
         return this.dataCrawler[facility].extractCurrent();
     }
 
-    getDay(facility: TFacility): ChartWeek {
+    getDay(facility: TFacility): IChartWeek {
         return this.dataCrawler[facility].extractDay();
     }
 
-    getEstimation(facility: TFacility): ChartWeek {
+    getEstimation(facility: TFacility): IChartWeek {
         return this.dataCrawler[facility].extractEstimation();
     }
 
-    getWeek(facility: TFacility): { data: { day: TDay; value: number }[]; maxPersonCount: number } {
+    getWeek(facility: TFacility): IWeekOverview {
         return this.dataCrawler[facility].extractWeek();
     }
 
@@ -42,12 +43,12 @@ export class StorageService {
         return this.dataCrawler[facility].extractYear();
     }
 
-    getAll(facility: TFacility): TDataType {
+    getAll(facility: TFacility): TStorageData {
         return this.dataCrawler[facility].data;
     }
 
     mergeDatabase(id: TFacility, buffer: Buffer): void {
-        let fileContent: TDataType;
+        let fileContent: TStorageData;
         try {
             const bufferString = buffer.toString("utf8");
             fileContent = JSON.parse(bufferString);

@@ -1,104 +1,104 @@
 const jsonSchema = {
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    $schema: "http://json-schema.org/draft-07/schema#",
     definitions: {
         IDataObject: {
             properties: {
                 value: {
-                    type: 'number',
+                    type: "number",
                 },
                 valueCount: {
-                    type: 'number',
+                    type: "number",
                 },
             },
-            type: 'object',
+            type: "object",
         },
         IHour: {
             properties: {
                 firstHalf: {
-                    $ref: '#/definitions/IDataObject',
+                    $ref: "#/definitions/IDataObject",
                 },
                 secondHalf: {
-                    $ref: '#/definitions/IDataObject',
+                    $ref: "#/definitions/IDataObject",
                 },
             },
-            type: 'object',
+            type: "object",
         },
-        'Record<day,THour>': {
-            description: 'Construct a type with a set of properties K of type T',
+        "Record<day,THour>": {
+            description: "Construct a type with a set of properties K of type T",
             properties: {
                 Friday: {
                     items: {
-                        $ref: '#/definitions/IHour',
+                        $ref: "#/definitions/IHour",
                     },
-                    type: 'array',
+                    type: "array",
                 },
                 Monday: {
                     items: {
-                        $ref: '#/definitions/IHour',
+                        $ref: "#/definitions/IHour",
                     },
-                    type: 'array',
+                    type: "array",
                 },
                 Saturday: {
                     items: {
-                        $ref: '#/definitions/IHour',
+                        $ref: "#/definitions/IHour",
                     },
-                    type: 'array',
+                    type: "array",
                 },
                 Sunday: {
                     items: {
-                        $ref: '#/definitions/IHour',
+                        $ref: "#/definitions/IHour",
                     },
-                    type: 'array',
+                    type: "array",
                 },
                 Thursday: {
                     items: {
-                        $ref: '#/definitions/IHour',
+                        $ref: "#/definitions/IHour",
                     },
-                    type: 'array',
+                    type: "array",
                 },
                 Tuesday: {
                     items: {
-                        $ref: '#/definitions/IHour',
+                        $ref: "#/definitions/IHour",
                     },
-                    type: 'array',
+                    type: "array",
                 },
                 Wednesday: {
                     items: {
-                        $ref: '#/definitions/IHour',
+                        $ref: "#/definitions/IHour",
                     },
-                    type: 'array',
+                    type: "array",
                 },
             },
-            type: 'object',
+            type: "object",
         },
     },
     properties: {
         current: {
-            $ref: '#/definitions/ICurrent',
+            $ref: "#/definitions/ICurrent",
         },
         year: {
             additionalProperties: false,
-            description: 'Construct a type with a set of properties K of type T',
+            description: "Construct a type with a set of properties K of type T",
             patternProperties: {
-                '^[0-9]+$': {
+                "^[0-9]+$": {
                     items: {
                         properties: {
                             data: {
-                                $ref: '#/definitions/Record<day,THour>',
+                                $ref: "#/definitions/Record<day,THour>",
                             },
                             maxPersonCount: {
-                                type: 'number',
+                                type: "number",
                             },
                         },
-                        type: ['object', 'null'],
+                        type: ["object", "null"],
                     },
-                    type: ['array', 'null'],
+                    type: ["array", "null"],
                 },
             },
-            type: ['object', 'null'],
+            type: ["object", "null"],
         },
     },
-    type: 'object',
+    type: "object",
 };
 
 export default jsonSchema;

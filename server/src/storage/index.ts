@@ -1,2 +1,2 @@
-export {default as DataCrawler} from './data-crawler';
-export * from './stoarge.interfaces';
+export {default as DataCrawler} from "./data-crawler";
+export * from "./stoarge.interfaces";

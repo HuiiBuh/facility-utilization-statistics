@@ -1,8 +1,8 @@
 const Config: TConfig = {
     bloeckle: {
         url:
-            'https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined',
-        fileName: 'db/bloeckle.json',
+            "https://186.webclimber.de/de/trafficlight?callback=WebclimberTrafficlight.insertTrafficlight&key=mNth0wfz3rvAbgGEBpCcCnP5d9Z5CzGF&container=trafficlightContainer&type=undefined&area=undefined",
+        fileName: "db/bloeckle.json",
         maxPersonCount: 50,
         openingHours: {
             Monday: {open: 15, close: 22},
@@ -16,8 +16,8 @@ const Config: TConfig = {
     },
     kletterbox: {
         url:
-            'https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM',
-        fileName: 'db/kletterbox.json',
+            "https://www.boulderado.de/boulderadoweb/gym-clientcounter/index.php?mode=get&token=eyJhbGciOiJIUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJjdXN0b21lciI6IkRBVlJhdmVuc2J1cmcifQ.Zc5xwX5Oh7-60O5_6FF14IlLuoYRTJnnJcLuBd5APeM",
+        fileName: "db/kletterbox.json",
         maxPersonCount: 25,
         openingHours: {
             Monday: {open: 17, close: 23},
@@ -29,6 +29,7 @@ const Config: TConfig = {
             Sunday: {open: 10, close: 21},
         },
     },
+    allowedFacilities: ["bloeckle", "kletterbox"]
 };
 
 export default Config;
@@ -46,14 +47,15 @@ export type TConfig = {
         url: string;
         maxPersonCount: number;
     };
+    allowedFacilities: string[]
 };
 
 export type TOpeningHours = {
-    Monday: {close: number; open: number};
-    Thursday: {close: number; open: number};
-    Friday: {close: number; open: number};
-    Sunday: {close: number; open: number};
-    Wednesday: {close: number; open: number};
-    Tuesday: {close: number; open: number};
-    Saturday: {close: number; open: number};
+    Monday: { close: number; open: number };
+    Thursday: { close: number; open: number };
+    Friday: { close: number; open: number };
+    Sunday: { close: number; open: number };
+    Wednesday: { close: number; open: number };
+    Tuesday: { close: number; open: number };
+    Saturday: { close: number; open: number };
 };

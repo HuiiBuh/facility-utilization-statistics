@@ -2,17 +2,17 @@ import * as fs from "fs";
 import {TOpeningHours} from "src/config";
 import jsonSchema from "src/storage/json.schema";
 import * as tv4 from "tv4";
+import {IChartWeek, IWeekOverview} from "../facility/facility.interfaces";
 import {sleep} from "./functions";
 
 import {
-    ChartWeek,
     ICurrent,
     IDataObject,
     IHour,
     IStorageAccessKeys,
-    TDataType,
     TDay,
     THour,
+    TStorageData,
     TWeek,
     TYear,
 } from "./stoarge.interfaces";
@@ -24,7 +24,7 @@ export default class DataStorage {
     private fileName: string;
     private readonly openingHours: TOpeningHours;
 
-    private _data: TDataType = {current: {maxPersonCount: 0, value: 0}, year: {}};
+    private _data: TStorageData = {current: {maxPersonCount: 0, value: 0}, year: {}};
     private _saveData: boolean = false;
 
     public JSONSchema = jsonSchema;
@@ -47,7 +47,7 @@ export default class DataStorage {
      * Validate the json scheme
      * @param json The json
      */
-    public validateJSON(json: TDataType): void {
+    public validateJSON(json: TStorageData): void {
         const value: boolean = tv4.validate(json, this.JSONSchema);
         if (value === false) throw Error(JSON.stringify(tv4.error));
     }
@@ -76,7 +76,10 @@ export default class DataStorage {
         }
     }
 
-    get data(): TDataType {
+    /**
+     * Get the data
+     */
+    get data(): TStorageData {
         return this._data;
     }
 
@@ -85,7 +88,7 @@ export default class DataStorage {
      * @param value The new value
      * @throws Error if data structure is not valid
      */
-    set data(value: TDataType) {
+    set data(value: TStorageData) {
         this.validateJSON(value);
         this._data = value;
     }
@@ -130,7 +133,7 @@ export default class DataStorage {
      * @param database The database which should be merged
      * @throws Error if data structure is not valid
      */
-    public mergeDataBases(database: TDataType): void {
+    public mergeDataBases(database: TStorageData): void {
         // Validate the database schema
         this.validateJSON(database);
 
@@ -312,11 +315,18 @@ export default class DataStorage {
 
     /*Extract the data*************************************************************************************************/
 
+    /**
+     * Extract the current utilization
+     */
     extractCurrent(): ICurrent {
         return this._data.current;
     }
 
-    extractDay(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): ChartWeek {
+    /**
+     * Extract the day hour by hour
+     * @param keys
+     */
+    extractDay(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): IChartWeek {
         const dayChart = this.makeDayChartCompatible({
             day: keys.day,
             data: this._data.year[keys.year][keys.week].data[keys.day]
@@ -328,8 +338,11 @@ export default class DataStorage {
         };
     }
 
-    extractWeek(): { data: { day: TDay; value: number }[]; maxPersonCount: number } {
-        const keys: IStorageAccessKeys = DataStorage.getJSONKeys();
+    /**
+     * Extract a week from the data
+     * @param keys The access keys to the week
+     */
+    extractWeek(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): IWeekOverview {
         const week: TWeek = this._data.year[keys.year][keys.week];
 
         const returnObject: { data: { day: TDay; value: number }[]; maxPersonCount: number } = {
@@ -345,8 +358,10 @@ export default class DataStorage {
         return returnObject;
     }
 
-
-    extractEstimation(): ChartWeek {
+    /**
+     * Extract the estimated data for the next days
+     */
+    extractEstimation(): IChartWeek {
         const {year, week} = DataStorage.getJSONKeys();
 
         const weekObject: TWeek = DataStorage.initWeek(this._data.year[year][week].maxPersonCount);
@@ -383,6 +398,9 @@ export default class DataStorage {
         return this.makeWeekChartCompatible(weekObject);
     }
 
+    /**
+     * Extract the month data
+     */
     extractMonth(): TWeek[] {
         const {year, week} = DataStorage.getJSONKeys();
 
@@ -394,6 +412,9 @@ export default class DataStorage {
         return month;
     }
 
+    /**
+     * Extract the year data
+     */
     extractYear(): TYear {
         const {year} = DataStorage.getJSONKeys();
         //TODO Make the year only a list of months with weeks
@@ -402,8 +423,12 @@ export default class DataStorage {
 
     /******************************************************************************************************************/
 
-    private makeWeekChartCompatible(response: TWeek): ChartWeek {
-        const convertedResponse: { day: TDay; data: IHour[] }[] = DataStorage.sortDays(response.data) as {
+    /**
+     * Convert the week data to a more chart compatible format
+     * @param data The week data
+     */
+    private makeWeekChartCompatible(data: TWeek): IChartWeek {
+        const convertedResponse: { day: TDay; data: IHour[] }[] = DataStorage.sortDays(data.data) as {
             day: TDay;
             data: IHour[];
         }[];
@@ -417,12 +442,15 @@ export default class DataStorage {
 
         return {
             data: dataList,
-            maxPersonCount: response.maxPersonCount,
+            maxPersonCount: data.maxPersonCount,
         };
     }
 
-
-    compressDay(day: { day: TDay; data: IHour[] }): { day: TDay; value: number } {
+    /**
+     * Compress the hours in a day to a average of a day
+     * @param day The day which should be compressed
+     */
+    compressDay(day: { day: TDay; data: IHour[] }): { day: TDay; value: number } | null {
 
         const {open, close} = this.openingHours[day.day];
 
@@ -433,18 +461,19 @@ export default class DataStorage {
 
             if (hourObject.firstHalf.valueCount !== 0) {
                 valueCount += hourObject.firstHalf.valueCount;
-                dayAverage += hourObject.firstHalf.valueCount;
+                dayAverage += hourObject.firstHalf.value;
             }
 
             if (hourObject.secondHalf.valueCount !== 0) {
                 valueCount += hourObject.secondHalf.valueCount;
-                dayAverage += hourObject.secondHalf.valueCount;
+                dayAverage += hourObject.secondHalf.value;
             }
-
         }
 
-
-        if (valueCount === 0) return null;
+        if (valueCount === 0) return {
+            day: day.day,
+            value: 0
+        };
 
         return {
             day: day.day,
@@ -452,6 +481,10 @@ export default class DataStorage {
         };
     }
 
+    /**
+     * Bring a day in a more chart compatible object
+     * @param day The day object
+     */
     private makeDayChartCompatible(day: { day: TDay; data: IHour[] }): { data: any[]; day: TDay; close: number; open: number } {
         const {open, close} = this.openingHours[day.day];
         const dayObject: { data: any[]; day: TDay; close: number; open: number } = {
@@ -470,6 +503,10 @@ export default class DataStorage {
         return dayObject;
     }
 
+    /**
+     * Sort a object with the days as key into a list
+     * @param dayList An object with the days of a week as keys
+     */
     private static sortDays(dayList: Record<TDay, any>): { day: TDay; data: any }[] {
         const sorter: Record<TDay, number> = {
             Monday: 1,
