@@ -1,4 +1,3 @@
-$navbar-height: 60px;
 $left-width: 300px;
 
 .fullscreen {
@@ -21,12 +20,13 @@ $left-width: 300px;
 
 .header {
   text-align: center;
+  padding-bottom: 5px;
 
   display: flex;
   justify-content: center;
   align-items: center;
 
-  height: $navbar-height;
+  height: 45px;
 
   position: relative;
 

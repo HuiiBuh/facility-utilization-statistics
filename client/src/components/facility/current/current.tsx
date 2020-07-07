@@ -85,7 +85,7 @@ export default class Current extends React.Component {
         if (!this.state)
             return <div/>;
 
-        this.renderCurrent();
+        return this.renderCurrent();
     }
 
     /**

@@ -5,8 +5,8 @@ function Credits() {
         <h1 className="text-center">Credits</h1>
 
 
-        Client:
-        <ul>
+        <h2 className="no-margin-bottom">Client:</h2>
+        <ul className="no-margin-top">
 
             <li><a href="https://www.flaticon.com/authors/photo3idea-studio">photo3idea_studio </a>
                 for the navigation bar image
@@ -25,11 +25,15 @@ function Credits() {
                 ReactTraining for their <a
                 href="https://github.com/ReactTraining/react-router#readme">Router</a> implementation
             </li>
+            <li>
+                inspect-js for their <a
+                href="https://github.com/inspect-js/node-deep-equal">deepe-qual</a> library
+            </li>
 
         </ul>
 
-        Server:
-        <ul>
+        <h2 className="no-margin-bottom">Server:</h2>
+        <ul className="no-margin-top">
             <li>tv4 for the <a href="https://github.com/geraintluff/tv4"> json schema validation</a></li>
             <li>YousefED for the <a href="https://github.com/YousefED/typescript-json-schema"> json schema creation</a>
             </li>

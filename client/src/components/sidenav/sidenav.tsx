@@ -37,7 +37,10 @@ export default class Sidenav extends React.Component {
         if (!this.state.hidden) navClassList += "show-menu";
 
         return <div className={navClassList}>
-            <span className="material-icons navbar-icon" onClick={this.showSidenav} onKeyPress={this.showSidenav}
+
+            <span className="material-icons navbar-icon"
+                  onClick={this.showSidenav}
+                  onKeyPress={this.showSidenav}
                   tabIndex={0}>menu</span>
 
             <div onClick={this.hideSidenav} className="nav-overlay"/>
