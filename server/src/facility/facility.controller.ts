@@ -17,7 +17,7 @@ export class FacilityController {
         const environment: string = process.env.ENVIRONMENT;
 
         if (!uploadKey && environment === "production") throw new Error("Upload key not found in environment");
-        else if (!uploadKey && environment !== "production") uploadKey = "test";
+        else if (!uploadKey && environment !== "production") uploadKey = "HuiBuh";
 
         this.uploadKey = uploadKey;
     }
@@ -94,7 +94,8 @@ export class FacilityController {
     @UseInterceptors(FileInterceptor("file"))
     @CheckFacility
     uploadFile(@Param("facility") facility: TFacility, @UploadedFile() file: IFile, @Req() request: Request): void {
-        const accessKey = request.headers["x-access-key"];
+
+        const accessKey = request.body["accessKey"];
         if (accessKey !== this.uploadKey) {
             throw new ForbiddenException("Wrong password");
         }

@@ -5,39 +5,55 @@ import Sidenav from "../sidenav/sidenav";
 
 import "./app.scss";
 
-
 class App extends React.Component {
     render() {
 
         return (
-            <div className="fullscreen flex">
+            <div>
 
-                <Sidenav/>
+                <Switch>
 
-                <div className="right">
+                    <Route path="/embed">
+                        {this.mainContent("/embed")}
+                    </Route>
 
-                    <Switch>
-                        <Route path="/facility/:facility" render={({match}) => (
-                            <Facility facility={match.params.facility}/>)}>
-                        </Route>
-                        <Route exact path="/credits">
-                            <Credits/>
-                        </Route>
-                        <Route exact path="/admin">
-                            <Admin/>
-                        </Route>
-                        <Route path="/" exact>
-                            <h1 className="text-center">Wähle eine Einrichtung</h1>
-                        </Route>
-                        <Route path="/">
-                            <h1 className="text-center">Nothing found</h1>
-                        </Route>
-                    </Switch>
+                    <Route path="/">
+                        <div className="fullscreen flex">
 
-                </div>
+                            <Sidenav/>
+
+                            <div className="right">
+                                {this.mainContent("")}
+                            </div>
+
+                        </div>
+                    </Route>
+
+                </Switch>
+
 
             </div>
         );
+    }
+
+    mainContent(baseURL: string) {
+        return <Switch>
+            <Route path={`${baseURL}/facility/:facility`} render={({match}) => (
+                <Facility baseURL={baseURL} facility={match.params.facility}/>)}>
+            </Route>
+            <Route exact path={`${baseURL}/credits`}>
+                <Credits/>
+            </Route>
+            <Route exact path={`${baseURL}/admin`}>
+                <Admin/>
+            </Route>
+            <Route path={`/`} exact>
+                <h1 className="text-center">Wähle eine Einrichtung</h1>
+            </Route>
+            <Route path="/">
+                <h1 className="text-center">Nothing found</h1>
+            </Route>
+        </Switch>;
     }
 }
 

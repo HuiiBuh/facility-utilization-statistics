@@ -20,14 +20,6 @@ body {
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important;
 }
 
-:root {
-  --primary: #2b998a;
-  --secondary: #09505a;
-  --secondary-light-1: rgba(9, 80, 90, 0.1);
-  --secondary-light-2: rgba(9, 80, 90, 0.03);
-  --warn: #f69217
-}
-
 a {
   text-decoration: none;
 }
@@ -53,6 +45,14 @@ h1, h2, h3, h4, h5, h6, {
 
   border: 0;
   border-top: 1px solid #e5e5e5;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.small-padding-right {
+  padding-right: .5rem;
 }
 
 .no-margin-right {
@@ -155,4 +155,17 @@ input {
 
 * {
   scrollbar-width: thin !important;
+}
+
+// Colors
+:root {
+  --primary: #2b998a;
+  --secondary: #09505a;
+  --secondary-light-1: rgba(9, 80, 90, 0.1);
+  --secondary-light-2: rgba(9, 80, 90, 0.03);
+  --warn: #f69217
+}
+
+.primary-text {
+  color: var(--primary);
 }

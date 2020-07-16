@@ -1,12 +1,8 @@
 import {BadRequestException, Injectable} from "@nestjs/common";
 
-import {DataCrawler, ICurrent, TDay, TFacility, TStorageData, TWeek, TYear} from "src/storage/";
+import {DataCrawler, ICurrent, TFacility, TStorageData, TWeek, TYear} from "src/storage/";
 import {IChartWeek, IWeekOverview} from "./facility.interfaces";
 
-interface State {
-    data: { day: TDay; data: number[] }[];
-    maxPersonCount: number;
-}
 
 @Injectable()
 export class StorageService {

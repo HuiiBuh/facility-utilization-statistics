@@ -1,8 +1,7 @@
 import deepEqual from "deep-equal";
 import React from "react";
-import APIClient from "../../api-client";
 import {LineGraph} from "../../graphs";
-import {createLabel} from "../functions";
+import {createLabels} from "../functions";
 import {IWeek, IWeekOverview} from "./line-graph-loader.interfaces";
 
 
@@ -17,8 +16,6 @@ type State = { data: IWeek | IWeekOverview, scope: string };
  * A class which loads data into line graphs
  */
 export default class LineGraphLoader extends React.Component {
-
-    private static apiClient: APIClient = new APIClient("/api/facility/");
 
     props: Props;
     state!: State;
@@ -50,7 +47,9 @@ export default class LineGraphLoader extends React.Component {
      * Make a api call to fetch the data and update the state
      */
     async updateComponent(): Promise<void> {
-        const response: any = await LineGraphLoader.apiClient.get(`${this.props.facility}/${this.props.scope}`);
+        const response: object = await fetch(`/api/facility/${this.props.facility}/${this.props.scope}`)
+            .then(async (response) => await response.json());
+
         this.setState({data: response, scope: this.props.scope});
     }
 
@@ -60,14 +59,14 @@ export default class LineGraphLoader extends React.Component {
         if (!this.state || this.props.scope !== this.state.scope)
             return <div/>;
 
-        if (this.props.scope === "week") return this.renderDayOverview();
-        else if (this.props.scope === "estimation") return this.renderMultipleDays();
+        if (this.props.scope === "week") return this.renderOneLineGraph();
+        else if (this.props.scope === "estimation") return this.renderMultipleLineGraphs();
     }
 
     /**
      * Render the week overview
      */
-    renderDayOverview() {
+    renderOneLineGraph() {
         const state: IWeekOverview = this.state.data as IWeekOverview;
 
         const valueList: number[] = [];
@@ -86,7 +85,7 @@ export default class LineGraphLoader extends React.Component {
     /**
      * Render multiple days as multiple diagrams below each other
      */
-    renderMultipleDays() {
+    renderMultipleLineGraphs() {
         const state: IWeek = this.state.data as IWeek;
 
         const dayList: any[] = [];
@@ -94,7 +93,7 @@ export default class LineGraphLoader extends React.Component {
 
             let labels: string[] = [];
             try {
-                labels = createLabel(day.data.length, day.open, day.close);
+                labels = createLabels(day.data.length, day.open, day.close);
             } catch (e) {
                 return;
             }

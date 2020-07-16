@@ -42,12 +42,17 @@
   transition: font-size .1s ease-in-out;
 }
 
-#browse-files {
-  color: var(--primary);
-  cursor: pointer;
-}
-
 .upload-button {
   float: right;
   margin-right: 0;
+}
+
+.delete-file-icon {
+  padding-left: .5rem;
+  color: var(--warn);
+}
+
+.v-center {
+  display: flex;
+  align-content: center;
 }

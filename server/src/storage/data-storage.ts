@@ -1,4 +1,5 @@
 import * as fs from "fs";
+
 import {TOpeningHours} from "src/config";
 import jsonSchema from "src/storage/json.schema";
 import * as tv4 from "tv4";
@@ -456,17 +457,20 @@ export default class DataStorage {
 
         let valueCount = 0;
         let dayAverage = 0;
-        for (let i = open; i < close; ++i) {
-            const hourObject: IHour = day.data[i];
+        for (let i = open; i <= close; i += 0.5) {
 
-            if (hourObject.firstHalf.valueCount !== 0) {
+            const hour = Math.floor(i);
+            const hourObject: IHour = day.data[hour];
+
+            let hourInstance: IDataObject;
+            // First half
+            if ((i % 1) !== 0) hourInstance = hourObject.firstHalf;
+            // Second half
+            else hourInstance = hourObject.secondHalf;
+
+            if (hourInstance.valueCount !== 0) {
                 valueCount += hourObject.firstHalf.valueCount;
                 dayAverage += hourObject.firstHalf.value;
-            }
-
-            if (hourObject.secondHalf.valueCount !== 0) {
-                valueCount += hourObject.secondHalf.valueCount;
-                dayAverage += hourObject.secondHalf.value;
             }
         }
 
@@ -494,10 +498,18 @@ export default class DataStorage {
             close: close
         };
 
-        for (let i = open; i < close; ++i) {
-            const hourObject: IHour = day.data[i];
-            dayObject.data.push(hourObject.firstHalf.value);
-            dayObject.data.push(hourObject.secondHalf.value);
+        for (let i = open; i <= close; i += 0.5) {
+
+            const hour = Math.floor(i);
+            const hourObject: IHour = day.data[hour];
+
+            let hourInstance: IDataObject;
+            // First half
+            if ((i % 1) !== 0) hourInstance = hourObject.firstHalf;
+            // Second half
+            else hourInstance = hourObject.secondHalf;
+
+            dayObject.data.push(hourInstance.value);
         }
 
         return dayObject;

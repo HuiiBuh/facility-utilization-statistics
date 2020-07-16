@@ -1,5 +1,5 @@
 import ApiClient from "src/app.request.maker";
-import Config from "src/config";
+import {Config} from "src/config/config";
 import DataStorage from "src/storage/data-storage";
 import {sleep} from "./functions";
 

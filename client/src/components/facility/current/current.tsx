@@ -1,15 +1,8 @@
 import React from "react";
-import APIClient from "../../api-client";
 import {BarGraph, LineGraph} from "../../graphs";
-import {createLabel} from "../functions";
-import {IWeek} from "../line-graph-loader/line-graph-loader.interfaces";
+import {createLabels} from "../functions";
+import {ICurrent, IWeek} from "../line-graph-loader/line-graph-loader.interfaces";
 
-interface ICurrent {
-    maxPersonCount: number
-    value: number
-    color: string
-    borderColor: string;
-}
 
 interface State {
     day: IWeek,
@@ -21,8 +14,6 @@ interface Props {
 }
 
 export default class Current extends React.Component {
-
-    private static apiClient: APIClient = new APIClient("/api/facility/");
 
     state!: State;
     props: Props;
@@ -55,9 +46,12 @@ export default class Current extends React.Component {
      * Update the component with the most recent data from the server
      */
     async updateComponent(): Promise<void> {
-        const day: IWeek = await Current.apiClient.get(`${this.props.facility}/today`);
+        const day: IWeek = await fetch(`/api/facility/${this.props.facility}/today`)
+            .then(async (response) => await response.json());
 
-        const current: ICurrent = await Current.apiClient.get(`${this.props.facility}/current`);
+        const current: ICurrent = await fetch(`/api/facility/${this.props.facility}/current`)
+            .then(async (response) => await response.json());
+
         Current.updateColor(current);
 
         const newState: State = {current: current, day: day};
@@ -93,7 +87,7 @@ export default class Current extends React.Component {
      */
     renderCurrent() {
         const day = this.state.day.data[0];
-        const labels: string[] = createLabel(day.data.length, day.open, day.close);
+        const labels: string[] = createLabels(day.data.length, day.open, day.close);
 
         return <div className="full-width">
             <BarGraph maxPersonCount={this.state.current.maxPersonCount} value={this.state.current.value}

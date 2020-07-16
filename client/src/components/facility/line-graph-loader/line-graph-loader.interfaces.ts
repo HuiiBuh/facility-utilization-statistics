@@ -10,6 +10,14 @@ export interface IWeek {
     maxPersonCount: number;
 }
 
+
+export interface ICurrent {
+    maxPersonCount: number
+    value: number
+    color: string
+    borderColor: string;
+}
+
 export interface IWeekOverview {
     data: {
         day: TDay;
