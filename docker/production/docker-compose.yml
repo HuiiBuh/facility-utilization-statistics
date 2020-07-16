@@ -1,0 +1,14 @@
+version: '2.0'
+services:
+  climbing-reverse-proxy:
+    build: proxy
+  climbing_client:
+    container_name: climbing_client
+    build: client
+    expose:
+      - 80
+  climbing_server:
+    container_name: climbing_server
+    build: server
+    expose:
+      - 3500
