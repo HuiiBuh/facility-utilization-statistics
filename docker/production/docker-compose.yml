@@ -1,7 +1,5 @@
 version: '2.0'
 services:
-  climbing-reverse-proxy:
-    build: proxy
   climbing_client:
     container_name: climbing_client
     build: client
@@ -10,5 +8,12 @@ services:
   climbing_server:
     container_name: climbing_server
     build: server
+    environment:
+      - ENVIRONMENT="production"
     expose:
       - 3500
+  climbing-reverse-proxy:
+    build: proxy
+    depends_on:
+      - climbing_client
+      - climbing_server

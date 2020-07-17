@@ -1,4 +1,8 @@
+rm -r client/src
+rm -r server/src
+
 mkdir client/src
+mkdir server/src
 
 cp -r ../../client/package*.json client/src
 cp -r ../../client/public client/src
