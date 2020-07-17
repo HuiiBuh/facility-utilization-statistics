@@ -13,7 +13,7 @@ cp -r ../../server/package*.json server/src
 cp -r ../../server/src server/src
 cp -r ../../server/tsconfig*.json server/src
 
-docker-compose build
+docker-compose build --no-cache
 
 rm -r client/src
 rm -r server/src

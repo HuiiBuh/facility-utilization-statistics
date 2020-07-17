@@ -15,7 +15,7 @@ COPY --from=builder /usr/src/app/build .
 RUN rm /etc/nginx/conf.d/default.conf
 
 # Copy the nginx config
-COPY nginx.conf /etc/nginx/conf.d/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Install openssl
 RUN apk add openssl
