@@ -16,7 +16,8 @@ export class FacilityController {
         let uploadKey: string = process.env.UPLOAD_KEY;
         const environment: string = process.env.ENVIRONMENT;
 
-        if (!uploadKey && environment === "production") throw new Error("Upload key not found in environment");
+        if (!uploadKey && environment === "production") throw new Error("Upload key not found in environment variables. " +
+            "Set UPLOAD_KEY to a value");
         else if (!uploadKey && environment !== "production") uploadKey = "HuiBuh";
 
         this.uploadKey = uploadKey;

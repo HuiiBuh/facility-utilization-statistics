@@ -10,9 +10,10 @@ export class StorageService {
     }
 
     async onModuleInit(): Promise<void> {
+        await this.dataCrawler.createDatabaseIfNotExist()
         await this.dataCrawler.loadDataFromFile();
         this.dataCrawler.startSaveDaemon();
-        this.dataCrawler.startCrawlingData();
+        this.dataCrawler.startCrawlingDaemon();
     }
 
     getCurrent(facility: TFacility): ICurrent {

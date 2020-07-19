@@ -9,10 +9,12 @@ services:
     container_name: climbing_server
     build: server
     environment:
-      - ENVIRONMENT="production"
+      - ENVIRONMENT=production
+      - UPLOAD_KEY=your_upload_key_here
     expose:
-      - 3500
-  climbing-reverse-proxy:
+      - 80
+  climbing_reverse_proxy:
+    container_name: climbing_reverse_proxy
     build: proxy
     depends_on:
       - climbing_client

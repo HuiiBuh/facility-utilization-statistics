@@ -4,3 +4,5 @@ To build the different docker containers run the `build.sh` file.
 Every nginx docker container uses self signed certificates, so the connection can be secured.
 
 Use your own reverse proxy with a valid cert as reverse in front of the reverse proxy of the application
+
+#### Change the UPLOAD_KEY environment variable in the docker compose

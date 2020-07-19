@@ -1,3 +1,4 @@
+import {existsSync} from "fs";
 import ApiClient from "src/app.request.maker";
 import {Config} from "src/config/config";
 import DataStorage from "src/storage/data-storage";
@@ -26,6 +27,18 @@ export default class DataCrawler {
         if (DataCrawler.INSTANCE) return DataCrawler.INSTANCE;
 
         DataCrawler.INSTANCE = this;
+    }
+
+    async createDatabaseIfNotExist(): Promise<void> {
+        if (!existsSync(Config.bloeckle.fileName)) {
+            this.bloeckle.initDatabase();
+            await this.bloeckle.writeToFile();
+        }
+
+        if (!existsSync(Config.kletterbox.fileName)) {
+            this.kletterbox.initDatabase();
+            await this.kletterbox.writeToFile();
+        }
     }
 
     /**
@@ -63,7 +76,7 @@ export default class DataCrawler {
     /**
      * Start the crawling of the data
      */
-    public startCrawlingData(): void {
+    public startCrawlingDaemon(): void {
         this.loadBloeckleData().then(() => {
             console.log("Bloeckle crawling stopped");
         });

@@ -546,4 +546,15 @@ export default class DataStorage {
 
         return orderedData;
     }
+
+    public initDatabase(): void {
+        const {year, week} = DataStorage.getJSONKeys();
+        const yearObject = DataStorage.initYear();
+        const weekObject = DataStorage.initWeek(this.maxPersonCount);
+        yearObject[week] = weekObject;
+
+        DataStorage.initDays(weekObject);
+
+        this._data.year[year] = yearObject;
+    }
 }
