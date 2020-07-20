@@ -2,12 +2,40 @@ import React from "react";
 import {Route, Switch} from "react-router-dom";
 import {Admin, Credits, Facility} from "../index";
 import Sidenav from "../sidenav/sidenav";
+import {IFacility} from "./app-interfaces";
 
 import "./app.scss";
 
-class App extends React.Component {
-    render() {
+type State = {
+    entryList: { identifier: string, name: string }[];
+    entryObject: Record<string, string>
+}
 
+class App extends React.Component {
+
+    /**
+     * Get the possible facilities from the backend and display them in the sidenav
+     */
+    public async componentDidMount(): Promise<void> {
+        const response: IFacility[] = await fetch("/api/facility/all")
+            .then(async (response) => await response.json());
+
+        const entryList = [];
+        const entryObject: Record<string, string> = {};
+        for (const facility of response) {
+
+            entryList.push({
+                identifier: facility.identifier,
+                name: facility.name
+            });
+
+            entryObject[facility.identifier] = facility.name;
+        }
+
+        this.setState({entryList: entryList, entryObject: entryObject});
+    }
+
+    render() {
         return (
             <div>
 
@@ -20,7 +48,7 @@ class App extends React.Component {
                     <Route path="/">
                         <div className="fullscreen flex">
 
-                            <Sidenav/>
+                            <Sidenav entries={this.state.entryList}/>
 
                             <div className="right">
                                 {this.mainContent("")}
@@ -31,15 +59,23 @@ class App extends React.Component {
 
                 </Switch>
 
-
             </div>
         );
     }
 
+    state: State = {
+        entryList: [],
+        entryObject: {}
+    };
+
     mainContent(baseURL: string) {
         return <Switch>
             <Route path={`${baseURL}/facility/:facility`} render={({match}) => (
-                <Facility baseURL={baseURL} facility={match.params.facility}/>)}>
+                <Facility
+                    baseURL={baseURL}
+                    identifier={match.params.facility}
+                    nameObject={this.state.entryObject}
+                />)}>
             </Route>
             <Route exact path={`${baseURL}/credits`}>
                 <Credits/>

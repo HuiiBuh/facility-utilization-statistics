@@ -5,13 +5,75 @@ import climbingImage from "../../images/climbing.svg";
 import "./sidenav.scss";
 
 interface State {
-    hidden: boolean
+    hidden: boolean,
+}
+
+interface Props {
+    entries: { identifier: string, name: string }[]
 }
 
 export default class Sidenav extends React.Component {
 
+    props: Props = {
+        entries: []
+    };
+
+    render() {
+        let navClassList: string = "nav-wrapper ";
+        if (!this.state.hidden) navClassList += "show-menu";
+
+        const facilityList: any[] = [];
+
+        this.props.entries.forEach((facility, i) => {
+            facilityList.push(
+                <NavLink to={`/facility/${facility.identifier}`}
+                         key={i}
+                         exact={false}
+                         className="menu-entry"
+                         activeClassName="nav-active">
+                    <h2>{facility.name}</h2>
+                </NavLink>
+            );
+        });
+
+        return (
+            <div className={navClassList}>
+
+            <span className="material-icons navbar-icon"
+                  onClick={this.showSidenav}
+                  onKeyPress={this.showSidenav}
+                  tabIndex={0}>menu</span>
+
+                <div onClick={this.hideSidenav} className="nav-overlay"/>
+
+                <div className="left">
+
+                    <div className="sidenav app-background">
+                        <img className="nav-image" src={climbingImage} alt="Climbing"/>
+
+                        <hr className="divider"/>
+
+                        {facilityList}
+
+                        <div className="bottom">
+
+                            {localStorage.getItem("isAdmin") &&
+                            <NavLink to="/admin" className="menu-entry" activeClassName="nav-active">
+                                <h2>Admin</h2>
+                            </NavLink>
+                            }
+
+                            <NavLink to="/credits" className="menu-entry" activeClassName="nav-active">
+                                <h2>Credits</h2>
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
+            </div>);
+    }
+
     state: State = {
-        hidden: true
+        hidden: true,
     };
 
     /**
@@ -32,50 +94,8 @@ export default class Sidenav extends React.Component {
         this.setState({hidden: false});
     };
 
-    render() {
-        let navClassList: string = "nav-wrapper ";
-        if (!this.state.hidden) navClassList += "show-menu";
-
-        return <div className={navClassList}>
-
-            <span className="material-icons navbar-icon"
-                  onClick={this.showSidenav}
-                  onKeyPress={this.showSidenav}
-                  tabIndex={0}>menu</span>
-
-            <div onClick={this.hideSidenav} className="nav-overlay"/>
-
-            <div className="left">
-
-                <div className="sidenav app-background">
-                    <img className="nav-image" src={climbingImage} alt="Climbing"/>
-
-                    <hr className="divider"/>
-
-                    <NavLink to="/facility/bloeckle/" exact={false} className="menu-entry"
-                             activeClassName="nav-active">
-                        <h2>Blöckle</h2>
-                    </NavLink>
-
-                    <NavLink to="/facility/kletterbox/" exact={false} className="menu-entry"
-                             activeClassName="nav-active">
-                        <h2>Kletterbox</h2>
-                    </NavLink>
-
-                    <div className="bottom">
-
-                        {localStorage.getItem("isAdmin") &&
-                        <NavLink to="/admin" className="menu-entry" activeClassName="nav-active">
-                            <h2>Admin</h2>
-                        </NavLink>
-                        }
-
-                        <NavLink to="/credits" className="menu-entry" activeClassName="nav-active">
-                            <h2>Credits</h2>
-                        </NavLink>
-                    </div>
-                </div>
-            </div>
-        </div>;
+    constructor(props: Props) {
+        super(props);
+        this.props = props;
     }
 }

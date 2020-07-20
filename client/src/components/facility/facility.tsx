@@ -12,8 +12,9 @@ import LineGraphLoader from "./line-graph-loader/line-graph-loader";
 type TStateString = "current" | "estimation" | "month" | "year" | "week"
 
 interface Props {
-    facility: string
+    identifier: string
     baseURL: string
+    nameObject: Record<string, string>
 }
 
 interface State {
@@ -100,9 +101,7 @@ export default class Facility extends React.Component {
 
 
     setTitle() {
-        let title = this.props.facility;
-        title = title.charAt(0).toUpperCase() + title.slice(1);
-        title = title.replace("oe", "ö");
+        let title = this.props.nameObject[this.props.identifier];
 
         if (this.state.current) title += " - Aktuell";
         if (this.state.year) title += " - Jahr";
@@ -119,72 +118,28 @@ export default class Facility extends React.Component {
             <div className="full-height">
 
                 <div className="header">
-                    <h1>{this.props.facility.charAt(0).toUpperCase() + this.props.facility.slice(1)}</h1>
+                    <h1>{this.props.nameObject[this.props.identifier]}</h1>
                 </div>
 
-                <div className="text-center">
-                    <div className="select-time">
-
-                        <NavLink to={`${this.props.baseURL}/facility/${this.props.facility}`} exact tabIndex={-1}
-                                 onClick={this.updateActiveButton("current")}
-                                 onKeyPress={this.onEnter("current")}>
-                            <RoundButton isSmall={true}
-                                         type={this.state.current ? "primary" : "secondary"}
-                                         isActive={this.state.current}>Aktuell</RoundButton>
-                        </NavLink>
-
-                        <NavLink to={`${this.props.baseURL}/facility/${this.props.facility}/week`} tabIndex={-1}
-                                 onClick={this.updateActiveButton("week")}
-                                 onKeyPress={this.onEnter("week")}>
-                            <RoundButton isSmall={true}
-                                         type={this.state.week ? "primary" : "secondary"}
-                                         isActive={this.state.week}>Woche</RoundButton>
-                        </NavLink>
-
-                        <NavLink to={`${this.props.baseURL}/facility/${this.props.facility}/estimation`} tabIndex={-1}
-                                 onClick={this.updateActiveButton("estimation")}
-                                 onKeyPress={this.onEnter("estimation")}>
-                            <RoundButton isSmall={true}
-                                         type={this.state.estimation ? "primary" : "secondary"}
-                                         isActive={this.state.estimation}>Erwartet</RoundButton>
-                        </NavLink>
-
-                        <NavLink to={`${this.props.baseURL}/facility/${this.props.facility}/month`} tabIndex={-1}
-                                 onClick={this.updateActiveButton("month")}
-                                 onKeyPress={this.onEnter("month")}>
-                            <RoundButton isSmall={true}
-                                         type={this.state.month ? "primary" : "secondary"}
-                                         isActive={this.state.month}>Monat</RoundButton>
-                        </NavLink>
-
-                        <NavLink to={`${this.props.baseURL}/facility/${this.props.facility}/year`} tabIndex={-1}
-                                 onClick={this.updateActiveButton("year")}
-                                 onKeyPress={this.onEnter("year")}>
-                            <RoundButton isSmall={true}
-                                         type={this.state.year ? "primary" : "secondary"}
-                                         isActive={this.state.year}>Jahr</RoundButton>
-                        </NavLink>
-
-                    </div>
-                </div>
+                {this.getNavigationButtons()}
 
                 <div className="diagram-outlet">
 
                     <Switch>
 
-                        <Route path={`${this.props.baseURL}/facility/${this.props.facility}/`} exact>
-                            <Current facility={this.props.facility}/>
+                        <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/`} exact>
+                            <Current facility={this.props.identifier}/>
                         </Route>
-                        <Route path={`${this.props.baseURL}/facility/${this.props.facility}/week`} exact>
-                            <LineGraphLoader facility={this.props.facility} scope="week"/>
+                        <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/week`} exact>
+                            <LineGraphLoader facility={this.props.identifier} scope="week"/>
                         </Route>
-                        <Route path={`${this.props.baseURL}/facility/${this.props.facility}/estimation`} exact>
-                            <LineGraphLoader facility={this.props.facility} scope="estimation"/>
+                        <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/estimation`} exact>
+                            <LineGraphLoader facility={this.props.identifier} scope="estimation"/>
                         </Route>
-                        <Route path={`${this.props.baseURL}/facility/${this.props.facility}/month`} exact>
+                        <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/month`} exact>
                             <h1 className="text-center">Coming soon</h1>
                         </Route>
-                        <Route path={`${this.props.baseURL}/facility/${this.props.facility}/year`} exact>
+                        <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/year`} exact>
                             <h1 className="text-center">Coming soon</h1>
                         </Route>
 
@@ -192,6 +147,55 @@ export default class Facility extends React.Component {
 
                 </div>
 
+            </div>
+        );
+    }
+
+    getNavigationButtons() {
+
+        return (
+            <div className="text-center">
+                <div className="select-time">
+                    <NavLink to={`${this.props.baseURL}/facility/${this.props.identifier}`} exact tabIndex={-1}
+                             onClick={this.updateActiveButton("current")}
+                             onKeyPress={this.onEnter("current")}>
+                        <RoundButton isSmall={true}
+                                     type={this.state.current ? "primary" : "secondary"}
+                                     isActive={this.state.current}>Aktuell</RoundButton>
+                    </NavLink>
+
+                    <NavLink to={`${this.props.baseURL}/facility/${this.props.identifier}/week`} tabIndex={-1}
+                             onClick={this.updateActiveButton("week")}
+                             onKeyPress={this.onEnter("week")}>
+                        <RoundButton isSmall={true}
+                                     type={this.state.week ? "primary" : "secondary"}
+                                     isActive={this.state.week}>Woche</RoundButton>
+                    </NavLink>
+
+                    <NavLink to={`${this.props.baseURL}/facility/${this.props.identifier}/estimation`} tabIndex={-1}
+                             onClick={this.updateActiveButton("estimation")}
+                             onKeyPress={this.onEnter("estimation")}>
+                        <RoundButton isSmall={true}
+                                     type={this.state.estimation ? "primary" : "secondary"}
+                                     isActive={this.state.estimation}>Erwartet</RoundButton>
+                    </NavLink>
+
+                    <NavLink to={`${this.props.baseURL}/facility/${this.props.identifier}/month`} tabIndex={-1}
+                             onClick={this.updateActiveButton("month")}
+                             onKeyPress={this.onEnter("month")}>
+                        <RoundButton isSmall={true}
+                                     type={this.state.month ? "primary" : "secondary"}
+                                     isActive={this.state.month}>Monat</RoundButton>
+                    </NavLink>
+
+                    <NavLink to={`${this.props.baseURL}/facility/${this.props.identifier}/year`} tabIndex={-1}
+                             onClick={this.updateActiveButton("year")}
+                             onKeyPress={this.onEnter("year")}>
+                        <RoundButton isSmall={true}
+                                     type={this.state.year ? "primary" : "secondary"}
+                                     isActive={this.state.year}>Jahr</RoundButton>
+                    </NavLink>
+                </div>
             </div>
         );
     }
