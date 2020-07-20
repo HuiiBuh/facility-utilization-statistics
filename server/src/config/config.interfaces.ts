@@ -1,17 +1,17 @@
 export type TConfig = {
-    bloeckle: {
-        fileName: string;
-        openingHours: TOpeningHours;
-        url: string;
-        maxPersonCount: number;
-    };
-    kletterbox: {
-        fileName: string;
-        openingHours: TOpeningHours;
-        url: string;
-        maxPersonCount: number;
-    };
+    bloeckle: TConfigFacility;
+    kletterbox: TConfigFacility;
 };
+
+export type TConfigFacility = {
+    fileName: string;
+    identifier?: string | undefined;
+    extractionHandler: (data: string) => number;
+    name: string
+    openingHours: TOpeningHours;
+    url: string;
+    maxPersonCount: number;
+}
 
 export type TOpeningHours = {
     Monday: { close: number; open: number };

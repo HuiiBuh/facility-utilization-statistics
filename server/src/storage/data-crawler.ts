@@ -1,22 +1,16 @@
 import {existsSync} from "fs";
 import ApiClient from "src/app.request.maker";
-import {Config} from "src/config/config";
+import {getConfigList} from "src/config/config";
 import DataStorage from "src/storage/data-storage";
+import {TConfigFacility} from "../config/config.interfaces";
 import {sleep} from "./functions";
 
 export default class DataCrawler {
-    public bloeckle = new DataStorage(
-        Config.bloeckle.maxPersonCount,
-        Config.bloeckle.fileName,
-        Config.bloeckle.openingHours,
-    );
-    public kletterbox = new DataStorage(
-        Config.kletterbox.maxPersonCount,
-        Config.kletterbox.fileName,
-        Config.kletterbox.openingHours,
-    );
 
     private static INSTANCE: DataCrawler = null;
+    private static API_CLIENT = new ApiClient();
+
+    public storage: Record<string, DataStorage> = {};
 
     public crawlingInterval: number = 2;
 
@@ -26,139 +20,123 @@ export default class DataCrawler {
     constructor() {
         if (DataCrawler.INSTANCE) return DataCrawler.INSTANCE;
 
+        this.createDataStoarges();
         DataCrawler.INSTANCE = this;
     }
 
+
+    /**
+     * Create the different storage classes
+     */
+    private createDataStoarges(): void {
+        for (const facility of getConfigList()) {
+            this.storage[facility.identifier] = new DataStorage(facility.maxPersonCount, facility.fileName, facility.openingHours);
+        }
+    }
+
+
+    /**
+     * Create the databases if they don't exist
+     */
     async createDatabaseIfNotExist(): Promise<void> {
-        if (!existsSync(Config.bloeckle.fileName)) {
-            this.bloeckle.initDatabase();
-            await this.bloeckle.writeToFile();
+        for (const facility of getConfigList()) {
+
+            if (!existsSync(facility.fileName)) {
+                this.storage[facility.identifier].initDatabase();
+                await this.storage[facility.identifier].writeToFile();
+                console.log(`Created ${facility.name} database.`);
+            }
+
         }
 
-        if (!existsSync(Config.kletterbox.fileName)) {
-            this.kletterbox.initDatabase();
-            await this.kletterbox.writeToFile();
-        }
     }
 
     /**
      * Load the databases from the files
      */
     public async loadDataFromFile(): Promise<void> {
-        await this.bloeckle.loadFromFile().catch(e => console.log("Could not load the bloeckle database.\n", e));
-        await this.kletterbox.loadFromFile().catch(e => console.log("Could not load the kletterbox database.\n", e));
+        for (const storage of this.dataStorageList) {
+            await storage.loadFromFile().catch(e => console.log(`Could not load the ${storage.fileName} database.\n`, e));
+        }
     }
 
     /**
      * Start the saving of the data in periodic time periods
      */
     public startSaveDaemon(): void {
-        this.bloeckle.saveData = true;
-        this.kletterbox.saveData = true;
+        for (const storage of this.dataStorageList) {
+            storage.saveData = true;
+        }
     }
 
     /**
      * Save the data to the files
      */
     public async saveAllData(): Promise<void> {
-        await this.bloeckle.writeToFile();
-        await this.kletterbox.writeToFile();
+        for (const storage of this.dataStorageList) {
+            await storage.writeToFile();
+        }
     }
 
     /**
      * End the continuous file saving
      */
     public endSaveDaemon(): void {
-        this.bloeckle.saveData = false;
-        this.kletterbox.saveData = false;
+        for (const storage of this.dataStorageList) {
+            storage.saveData = false;
+        }
     }
 
     /**
      * Start the crawling of the data
      */
     public startCrawlingDaemon(): void {
-        this.loadBloeckleData().then(() => {
-            console.log("Bloeckle crawling stopped");
-        });
-        this.loadKletterboxData().then(() => {
-            console.log("Kletterbox crawling stopped");
-        });
-    }
+        for (const storageConfig of getConfigList()) {
 
-    /**
-     * Load the data from the bloeckle website
-     */
-    private async loadBloeckleData(): Promise<void> {
-        const apiClient = new ApiClient();
-        while (true) {
-            let response: string | void = await apiClient.get(Config.bloeckle.url).catch(error => console.log(error));
-            if (!response) response = "";
-
-            try {
-                this.bloeckle.setInformation(DataCrawler.extractBloeckleData(response));
-            } catch (e) {
-                console.error(e);
-            }
-            await sleep(5 * 60 * 1000);
+            const storageObject = this.storage[storageConfig.identifier];
+            this.loadData(storageObject, storageConfig).then(() => console.log(`${storageConfig.fileName} stopped crawling`));
         }
     }
 
-    /**
-     * Extract the data from the bloeckle website
-     * @param data The crawled data
-     * @returns The blocked percentage
-     */
-    private static extractBloeckleData(data: string): number {
-        const startRegex = new RegExp(`style='width: *`);
-        const startMatch: RegExpExecArray = startRegex.exec(data);
-        const startIndex: number = startMatch.index + startMatch[0].length;
-
-        const endRegex = new RegExp("% *;");
-        const endMatch: RegExpExecArray = endRegex.exec(data);
-        const endIndex = endMatch.index;
-
-        const percentage: string = data.slice(startIndex, endIndex);
-        return parseFloat(percentage);
-    }
 
     /**
-     * Load the data from the kletterbox website
+     * Load the data from the different facility websites
+     * @param storageObject The storage object
+     * @param storageConfig The storages config object
      */
-    private async loadKletterboxData(): Promise<void> {
-        const apiClient = new ApiClient();
+    private async loadData(storageObject: DataStorage, storageConfig: TConfigFacility): Promise<void> {
+
         while (true) {
-            let response: string | void = await apiClient.get(Config.kletterbox.url).catch(error => console.log(error));
-            if (!response) response = "";
-
-            try {
-                this.kletterbox.setInformation(DataCrawler.extractKletterboxData(response));
-            } catch (e) {
-                console.error(e);
+            const response: string | null = await DataCrawler.API_CLIENT.get(storageConfig.url);
+            if (response) {
+                try {
+                    const extractedPercentage: number = storageConfig.extractionHandler(response);
+                    this.storage[storageConfig.identifier].setInformation(extractedPercentage);
+                } catch (e) {
+                    console.log(`Could not extract the response from ${storageConfig.name}`);
+                }
             }
             await sleep(this.crawlingInterval * 60 * 1000);
         }
+
     }
+
 
     /**
-     * Extract the data from the kletterbox website
-     * @param data The crawled data
-     * @returns The blocked percentage
+     * Get a list of the storage objects
      */
-    private static extractKletterboxData(data: string): number {
-        const startRegex = new RegExp(`<span data-value="`, "g");
+    private get dataStorageList(): DataStorage[] {
 
-        const startMatchOne: RegExpExecArray = startRegex.exec(data);
-        const startIndexOne: number = startMatchOne.index + startMatchOne[0].length;
+        const dataStorageKeys: string[] = Object.keys(this.storage);
+        const returnList: DataStorage[] = [];
 
-        const startMatchTwo: RegExpExecArray = startRegex.exec(data);
-        const startIndexTwo: number = startMatchTwo.index + startMatchTwo[0].length;
+        for (const storageIdentifier of dataStorageKeys) {
+            if (!this.storage.hasOwnProperty(storageIdentifier)) continue;
 
-        const endRegex = new RegExp("\">[0-9]*</span>", "g");
-        const endIndexOne: number = endRegex.exec(data).index;
-        const endIndexTwo: number = endRegex.exec(data).index;
+            returnList.push(this.storage[storageIdentifier]);
+        }
 
-        const blocked: number = parseFloat(data.slice(startIndexOne, endIndexOne));
-        const free: number = parseFloat(data.slice(startIndexTwo, endIndexTwo));
-        return (blocked / (blocked + free)) * 100;
+        return returnList;
     }
+
 }

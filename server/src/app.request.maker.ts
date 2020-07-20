@@ -3,31 +3,21 @@ import * as https from "https";
 import {RequestOptions} from "https";
 
 export default class RequestMaker {
-    private readonly _baseURL: string;
-    private readonly headers: OutgoingHttpHeaders;
-
-    /**
-     * A new async api client which converts callbacks to promises
-     * @param baseURL The base url of the server
-     * @param header The headers which should be sent with every request
-     */
-    constructor(baseURL = "", header: OutgoingHttpHeaders = null) {
-        this._baseURL = baseURL;
-        this.headers = header;
-    }
 
     /**
      * Put request (Errors get handled)
      * @param url The url (relative to the base url)
      * @param urlParams A json object which will be used to create the url params
      * @param body The body as a json
+     * @param headers The request headers
      */
     public async put(
         url: string,
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
-    ): Promise<string> {
-        return await this.request("PUT", url, urlParams, body);
+        headers: OutgoingHttpHeaders = {}
+    ): Promise<string | null> {
+        return await this.request("PUT", url, urlParams, body, headers);
     }
 
     /**
@@ -35,13 +25,15 @@ export default class RequestMaker {
      * @param url The url (relative to the base url)
      * @param urlParams A json object which will be used to create the url params
      * @param body The body as a json
+     * @param headers The request headers
      */
     public async get(
         url: string,
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
-    ): Promise<string> {
-        return await this.request("GET", url, urlParams, body);
+        headers: OutgoingHttpHeaders = {}
+    ): Promise<string | null> {
+        return await this.request("GET", url, urlParams, body, headers);
     }
 
     /**
@@ -49,13 +41,15 @@ export default class RequestMaker {
      * @param url The url (relative to the base url)
      * @param urlParams A json object which will be used to create the url params
      * @param body The body as a json
+     * @param headers The request headers
      */
     public async post(
         url: string,
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
-    ): Promise<string> {
-        return await this.request("POST", url, urlParams, body);
+        headers: OutgoingHttpHeaders = {}
+    ): Promise<string | null> {
+        return await this.request("POST", url, urlParams, body, headers);
     }
 
     /**
@@ -63,13 +57,15 @@ export default class RequestMaker {
      * @param url The url (relative to the base url)
      * @param urlParams A json object which will be used to create the url params
      * @param body The body as a json
+     * @param headers The request headers
      */
     public async delete(
         url: string,
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
-    ): Promise<string> {
-        return await this.request("DELETE", url, urlParams, body);
+        headers: OutgoingHttpHeaders = {}
+    ): Promise<string | null> {
+        return await this.request("DELETE", url, urlParams, body, headers);
     }
 
     /**
@@ -78,43 +74,51 @@ export default class RequestMaker {
      * @param url The url (relative to the base url)
      * @param urlParams A json object which will be used to create the url params
      * @param body The body as a json
+     * @param headers To request headers
      */
     public async request(
         method: "GET" | "POST" | "DELETE" | "PUT",
         url: string,
         urlParams: URLSearchParams = null,
         body: Record<string, unknown> = {},
-    ): Promise<string> {
+        headers: OutgoingHttpHeaders = {}
+    ): Promise<string | null> {
+
         // Add url params
-        url = this._baseURL + url;
         if (urlParams) {
             url += "?" + new URLSearchParams(urlParams).toString();
         }
 
-        let bodyString = "";
         // Parse the json object to string
+        let bodyString = "";
         if (typeof body === "object") {
             bodyString = JSON.stringify(body);
         }
 
-        return await this.executeRequest(method, url, bodyString);
+        // Add the request method
+        const options: RequestOptions = {
+            method: method,
+        };
+
+        // Add the request headers
+        if (headers) {
+            options.headers = headers;
+        }
+        try {
+            return await this.makeRequest(url, options, bodyString);
+        } catch (e) {
+            RequestMaker.handleErrors(e);
+        }
     }
 
     /**
      * Make the available request (No error handling)
-     * @param method The request method
-     * @param url The complete request url
+     * @param url The request url
+     * @param options The request options
      * @param body The body json as a json string
      */
-    public executeRequest(method: string, url: string, body: string): Promise<string> {
+    public makeRequest(url: string, options: RequestOptions, body: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            const options: RequestOptions = {
-                method: method,
-            };
-
-            if (this.headers) {
-                options.headers = this.headers;
-            }
 
             const req: ClientRequest = https.request(url, options, (res: IncomingMessage) => {
                 let data = "";
@@ -134,5 +138,13 @@ export default class RequestMaker {
             req.write(body);
             req.end();
         });
+    }
+
+    /**
+     * Handle request errors
+     * @param e
+     */
+    private static handleErrors(e: Error): void {
+        console.error(e);
     }
 }

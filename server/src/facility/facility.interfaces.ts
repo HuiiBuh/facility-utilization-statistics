@@ -1,3 +1,4 @@
+import {TOpeningHours} from "../config";
 import {TDay} from "../storage";
 
 export interface IFile {
@@ -25,4 +26,11 @@ export interface IWeekOverview {
         value: number
     }[];
     maxPersonCount: number
+}
+
+export interface IFacility {
+    name: string
+    identifier: string
+    maxPersonCount: number
+    openingHours: TOpeningHours
 }
