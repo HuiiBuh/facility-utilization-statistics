@@ -1,5 +1,6 @@
 import {TConfig, TConfigFacility} from "./config.interfaces";
 import {extractBloeckleData} from "./extraction-handler/bloeckle";
+import {extractJumperData} from "./extraction-handler/jumpers";
 import {extractKletterboxData} from "./extraction-handler/kletterbox";
 
 export const Config: TConfig = {
@@ -36,6 +37,24 @@ export const Config: TConfig = {
             Sunday: {open: 10, close: 21},
         },
         extractionHandler: extractKletterboxData
+    },
+
+    jumpers_friedrichshafen: {
+        url:
+            "https://www.jumpers-fitness.com/studios/friedrichshafen/studioauslastung.json?type=1589285582&tx_twofourjumpersintratech_customernumber%5BbranchId%5D=38",
+        fileName: "db/jumpers_friedrichshafen.json",
+        name: "Jumpers Friedrichshafen",
+        maxPersonCount: 120,
+        openingHours: {
+            Monday: {open: 6, close: 24},
+            Tuesday: {open: 6, close: 24},
+            Wednesday: {open: 6, close: 24},
+            Thursday: {open: 6, close: 24},
+            Friday: {open: 6, close: 24},
+            Saturday: {open: 9, close: 22},
+            Sunday: {open: 9, close: 22},
+        },
+        extractionHandler: extractJumperData
     },
 };
 

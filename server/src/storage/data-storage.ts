@@ -488,16 +488,7 @@ export default class DataStorage {
         };
 
         for (let i = open; i <= close; i += 0.5) {
-
-            const hour = Math.floor(i);
-            const hourObject: IHour = day.data[hour];
-
-            let hourInstance: IDataObject;
-            // First half
-            if ((i % 1) !== 0) hourInstance = hourObject.firstHalf;
-            // Second half
-            else hourInstance = hourObject.secondHalf;
-
+            const {hourInstance} = DataStorage.getHourInstance(i, day);
             dayObject.data.push(hourInstance.value);
         }
 
@@ -516,16 +507,9 @@ export default class DataStorage {
         let dayAverage = 0;
         for (let i = open; i <= close; i += 0.5) {
 
-            const hour = Math.floor(i);
-            const hourObject: IHour = day.data[hour];
+            const {hourObject} = DataStorage.getHourInstance(i, day);
 
-            let hourInstance: IDataObject;
-            // First half
-            if ((i % 1) !== 0) hourInstance = hourObject.firstHalf;
-            // Second half
-            else hourInstance = hourObject.secondHalf;
-
-            if (hourInstance.valueCount !== 0) {
+            if (hourObject.firstHalf.valueCount !== 0) {
                 valueCount += hourObject.firstHalf.valueCount;
                 dayAverage += hourObject.firstHalf.value;
             }
@@ -540,6 +524,21 @@ export default class DataStorage {
             day: day.day,
             value: dayAverage / valueCount
         };
+    }
+
+    private static getHourInstance(i: number, day: { day: TDay; data: IHour[] }): { hourObject: any, hourInstance: any } {
+        let hour = Math.floor(i);
+        if (hour === 24) hour = hour - 24;
+
+        const hourObject: IHour = day.data[hour];
+
+        let hourInstance: IDataObject;
+        // First half
+        if ((i % 1) !== 0) hourInstance = hourObject.firstHalf;
+        // Second half
+        else hourInstance = hourObject.secondHalf;
+
+        return {hourObject: hourObject, hourInstance: hourInstance};
     }
 
 
