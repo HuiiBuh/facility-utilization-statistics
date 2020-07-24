@@ -3,9 +3,10 @@ import {FileInterceptor} from "@nestjs/platform-express";
 import {Request} from "express";
 
 import {ICurrent, TFacility, TStorageData, TWeek, TYear} from "src/storage";
+import {getConfigList} from "../config/config";
 
 import {CheckFacility} from "./facility.decorators";
-import {IChartWeek, IFile, IWeekOverview} from "./facility.interfaces";
+import {IChartWeek, IFacility, IFile, IWeekOverview} from "./facility.interfaces";
 import {StorageService} from "./storage.service";
 
 @Controller("api/facility")
@@ -21,6 +22,20 @@ export class FacilityController {
         else if (!uploadKey && environment !== "production") uploadKey = "HuiBuh";
 
         this.uploadKey = uploadKey;
+    }
+
+    @Get("all")
+    getAllFacilities(): IFacility[] {
+        const returnList: IFacility[] = [];
+        for (const facility of getConfigList()) {
+            returnList.push({
+                name: facility.name,
+                identifier: facility.identifier,
+                maxPersonCount: facility.maxPersonCount,
+                openingHours: facility.openingHours
+            });
+        }
+        return returnList;
     }
 
     /**

@@ -10,38 +10,38 @@ export class StorageService {
     }
 
     async onModuleInit(): Promise<void> {
-        await this.dataCrawler.createDatabaseIfNotExist()
+        await this.dataCrawler.createDatabaseIfNotExist();
         await this.dataCrawler.loadDataFromFile();
         this.dataCrawler.startSaveDaemon();
         this.dataCrawler.startCrawlingDaemon();
     }
 
     getCurrent(facility: TFacility): ICurrent {
-        return this.dataCrawler[facility].extractCurrent();
+        return this.dataCrawler.storage[facility].extractCurrent();
     }
 
     getDay(facility: TFacility): IChartWeek {
-        return this.dataCrawler[facility].extractDay();
+        return this.dataCrawler.storage[facility].extractDay();
     }
 
     getEstimation(facility: TFacility): IChartWeek {
-        return this.dataCrawler[facility].extractEstimation();
+        return this.dataCrawler.storage[facility].extractEstimation();
     }
 
     getWeek(facility: TFacility): IWeekOverview {
-        return this.dataCrawler[facility].extractWeek();
+        return this.dataCrawler.storage[facility].extractWeek();
     }
 
     getMonth(facility: TFacility): TWeek[] {
-        return this.dataCrawler[facility].extractMonth();
+        return this.dataCrawler.storage[facility].extractMonth();
     }
 
     getYear(facility: TFacility): TYear {
-        return this.dataCrawler[facility].extractYear();
+        return this.dataCrawler.storage[facility].extractYear();
     }
 
     getAll(facility: TFacility): TStorageData {
-        return this.dataCrawler[facility].data;
+        return this.dataCrawler.storage[facility].data;
     }
 
     mergeDatabase(id: TFacility, buffer: Buffer): void {
@@ -54,7 +54,7 @@ export class StorageService {
         }
 
         try {
-            this.dataCrawler[id].mergeDataBases(fileContent);
+            this.dataCrawler.storage[id].mergeDataBases(fileContent);
         } catch {
             throw new BadRequestException("The json schema of your file is wrong");
         }

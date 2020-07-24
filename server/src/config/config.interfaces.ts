@@ -1,11 +1,14 @@
 export type TConfig = {
-    bloeckle: TFacilityConfig
-    kletterbox: TFacilityConfig
-    jumpers_friedrichshafen: TFacilityConfig
+    bloeckle: TConfigFacility
+    kletterbox: TConfigFacility
+    jumpers_friedrichshafen: TConfigFacility
 };
 
-export type TFacilityConfig = {
+export type TConfigFacility = {
     fileName: string;
+    identifier?: string | undefined;
+    extractionHandler: (data: string) => number;
+    name: string
     openingHours: TOpeningHours;
     url: string;
     maxPersonCount: number;

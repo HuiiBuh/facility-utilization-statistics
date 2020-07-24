@@ -22,7 +22,7 @@ import {
  * An object which handles the updating and storing of the collected data
  */
 export default class DataStorage {
-    private fileName: string;
+    private readonly _fileName: string;
     private readonly openingHours: TOpeningHours;
 
     private _data: TStorageData = {current: {maxPersonCount: 0, value: 0}, year: {}};
@@ -39,7 +39,7 @@ export default class DataStorage {
      * @param openingHours The opening hours of the facility
      */
     constructor(maxPersonCount: number, fileName: string, openingHours: TOpeningHours) {
-        this.fileName = fileName;
+        this._fileName = fileName;
         this.maxPersonCount = maxPersonCount;
         this.openingHours = openingHours;
     }
@@ -78,6 +78,18 @@ export default class DataStorage {
     }
 
     /**
+     * Should the crawled data be saved
+     */
+    get saveData(): boolean {
+        return this._saveData;
+    }
+
+
+    get fileName(): string {
+        return this._fileName;
+    }
+
+    /**
      * Get the data
      */
     get data(): TStorageData {
@@ -98,7 +110,7 @@ export default class DataStorage {
      * Load the data from a file
      * @param fileName Optional the filename the data should be loaded from
      */
-    public async loadFromFile(fileName = this.fileName): Promise<void> {
+    public async loadFromFile(fileName = this._fileName): Promise<void> {
         return new Promise((resolve, reject) => {
             fs.readFile(fileName, (err, data) => {
                 if (err) {
@@ -122,7 +134,7 @@ export default class DataStorage {
      * Write the internal data to a file
      * @param fileName Optional the filename the data should be saved to
      */
-    public writeToFile(fileName = this.fileName): Promise<any> {
+    public writeToFile(fileName = this._fileName): Promise<any> {
         return new Promise(resolve => {
             const dataString = JSON.stringify(this._data);
             fs.writeFile(fileName, dataString, resolve);
@@ -234,6 +246,20 @@ export default class DataStorage {
     }
 
     /**
+     * Init the database with null values
+     */
+    public initDatabase(): void {
+        const {year, week} = DataStorage.getJSONKeys();
+        const yearObject = DataStorage.initYear();
+        const weekObject = DataStorage.initWeek(this.maxPersonCount);
+        yearObject[week] = weekObject;
+
+        DataStorage.initDays(weekObject);
+
+        this._data.year[year] = yearObject;
+    }
+
+    /**
      * Init the year
      */
     private static initYear(): TWeek[] {
@@ -286,7 +312,7 @@ export default class DataStorage {
     /**
      * Get the json access keys to data for the current time
      */
-    public static getJSONKeys(currentDate = new Date()): IStorageAccessKeys {
+    private static getJSONKeys(currentDate = new Date()): IStorageAccessKeys {
         return {
             day: currentDate.toLocaleString("en-us", {
                 weekday: "long",
@@ -301,7 +327,7 @@ export default class DataStorage {
     /**
      * Get current week number
      */
-    public static getWeek(date = new Date()): number {
+    private static getWeek(date = new Date()): number {
         // Copy the date object so you don't change the original
         date = new Date(date);
 
@@ -319,7 +345,7 @@ export default class DataStorage {
     /**
      * Extract the current utilization
      */
-    extractCurrent(): ICurrent {
+    public extractCurrent(): ICurrent {
         return this._data.current;
     }
 
@@ -327,7 +353,7 @@ export default class DataStorage {
      * Extract the day hour by hour
      * @param keys
      */
-    extractDay(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): IChartWeek {
+    public extractDay(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): IChartWeek {
         const dayChart = this.makeDayChartCompatible({
             day: keys.day,
             data: this._data.year[keys.year][keys.week].data[keys.day]
@@ -343,7 +369,7 @@ export default class DataStorage {
      * Extract a week from the data
      * @param keys The access keys to the week
      */
-    extractWeek(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): IWeekOverview {
+    public extractWeek(keys: IStorageAccessKeys = DataStorage.getJSONKeys()): IWeekOverview {
         const week: TWeek = this._data.year[keys.year][keys.week];
 
         const returnObject: { data: { day: TDay; value: number }[]; maxPersonCount: number } = {
@@ -362,7 +388,7 @@ export default class DataStorage {
     /**
      * Extract the estimated data for the next days
      */
-    extractEstimation(): IChartWeek {
+    public extractEstimation(): IChartWeek {
         const {year, week} = DataStorage.getJSONKeys();
 
         const weekObject: TWeek = DataStorage.initWeek(this._data.year[year][week].maxPersonCount);
@@ -447,11 +473,42 @@ export default class DataStorage {
         };
     }
 
+
+    /**
+     * Bring a day in a more chart compatible object
+     * @param day The day object
+     */
+    private makeDayChartCompatible(day: { day: TDay; data: IHour[] }): { data: any[]; day: TDay; close: number; open: number } {
+        const {open, close} = this.openingHours[day.day];
+        const dayObject: { data: any[]; day: TDay; close: number; open: number } = {
+            day: day.day,
+            data: [],
+            open: open,
+            close: close
+        };
+
+        for (let i = open; i <= close; i += 0.5) {
+
+            const hour = Math.floor(i);
+            const hourObject: IHour = day.data[hour];
+
+            let hourInstance: IDataObject;
+            // First half
+            if ((i % 1) !== 0) hourInstance = hourObject.firstHalf;
+            // Second half
+            else hourInstance = hourObject.secondHalf;
+
+            dayObject.data.push(hourInstance.value);
+        }
+
+        return dayObject;
+    }
+
     /**
      * Compress the hours in a day to a average of a day
      * @param day The day which should be compressed
      */
-    compressDay(day: { day: TDay; data: IHour[] }): { day: TDay; value: number } | null {
+    private compressDay(day: { day: TDay; data: IHour[] }): { day: TDay; value: number } | null {
 
         const {open, close} = this.openingHours[day.day];
 
@@ -485,35 +542,6 @@ export default class DataStorage {
         };
     }
 
-    /**
-     * Bring a day in a more chart compatible object
-     * @param day The day object
-     */
-    private makeDayChartCompatible(day: { day: TDay; data: IHour[] }): { data: any[]; day: TDay; close: number; open: number } {
-        const {open, close} = this.openingHours[day.day];
-        const dayObject: { data: any[]; day: TDay; close: number; open: number } = {
-            day: day.day,
-            data: [],
-            open: open,
-            close: close
-        };
-
-        for (let i = open; i <= close; i += 0.5) {
-
-            const hour = Math.floor(i);
-            const hourObject: IHour = day.data[hour];
-
-            let hourInstance: IDataObject;
-            // First half
-            if ((i % 1) !== 0) hourInstance = hourObject.firstHalf;
-            // Second half
-            else hourInstance = hourObject.secondHalf;
-
-            dayObject.data.push(hourInstance.value);
-        }
-
-        return dayObject;
-    }
 
     /**
      * Sort a object with the days as key into a list
@@ -545,16 +573,5 @@ export default class DataStorage {
         }
 
         return orderedData;
-    }
-
-    public initDatabase(): void {
-        const {year, week} = DataStorage.getJSONKeys();
-        const yearObject = DataStorage.initYear();
-        const weekObject = DataStorage.initWeek(this.maxPersonCount);
-        yearObject[week] = weekObject;
-
-        DataStorage.initDays(weekObject);
-
-        this._data.year[year] = yearObject;
     }
 }
