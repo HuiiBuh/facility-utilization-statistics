@@ -1,17 +1,15 @@
 export type TConfig = {
-    bloeckle: {
-        fileName: string;
-        openingHours: TOpeningHours;
-        url: string;
-        maxPersonCount: number;
-    };
-    kletterbox: {
-        fileName: string;
-        openingHours: TOpeningHours;
-        url: string;
-        maxPersonCount: number;
-    };
+    bloeckle: TFacilityConfig
+    kletterbox: TFacilityConfig
+    jumpers_friedrichshafen: TFacilityConfig
 };
+
+export type TFacilityConfig = {
+    fileName: string;
+    openingHours: TOpeningHours;
+    url: string;
+    maxPersonCount: number;
+}
 
 export type TOpeningHours = {
     Monday: { close: number; open: number };
