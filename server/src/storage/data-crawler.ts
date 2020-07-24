@@ -40,7 +40,6 @@ export default class DataCrawler {
      */
     async createDatabaseIfNotExist(): Promise<void> {
         for (const facility of getConfigList()) {
-
             if (!existsSync(facility.fileName)) {
                 this.storage[facility.identifier].initDatabase();
                 await this.storage[facility.identifier].writeToFile();

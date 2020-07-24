@@ -13,6 +13,6 @@ RUN apk add openssl
 
 # Generate the keys
 RUN mkdir /keys && openssl req -newkey rsa:2048 -nodes -keyout /keys/nestjs.key -x509 -days 365 -out /keys/nestjs.cert \
--subj "/C=DE/ST=BW/L=Friedrichshaven/O=dhbw/OU=IT/CN=nodomain.nodomain"
+    -subj "/C=DE/ST=BW/L=Friedrichshaven/O=dhbw/OU=IT/CN=nodomain.nodomain"
 
 CMD npm run start:prod

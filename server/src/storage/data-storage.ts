@@ -1,4 +1,5 @@
-import * as fs from "fs";
+import fs from "fs";
+import path from "path";
 
 import {TOpeningHours} from "src/config";
 import jsonSchema from "src/storage/json.schema";
@@ -17,6 +18,7 @@ import {
     TWeek,
     TYear,
 } from "./stoarge.interfaces";
+import ErrnoException = NodeJS.ErrnoException;
 
 /**
  * An object which handles the updating and storing of the collected data
@@ -135,9 +137,19 @@ export default class DataStorage {
      * @param fileName Optional the filename the data should be saved to
      */
     public writeToFile(fileName = this._fileName): Promise<any> {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
+
+            const dirName = path.dirname(this._fileName);
+            if (!fs.existsSync(dirName)) {
+                // TODO create dir and check out fs promises
+                await fs_p.mkdir(dirName, {recursive: true});
+            }
+
             const dataString = JSON.stringify(this._data);
-            fs.writeFile(fileName, dataString, resolve);
+            fs.writeFile(fileName, dataString, (e: ErrnoException | null) => {
+                if (e) return reject(e);
+                return resolve(null);
+            });
         });
     }
 
@@ -526,6 +538,11 @@ export default class DataStorage {
         };
     }
 
+    /**
+     * Extracts the hour instance and the our object from a day object
+     * @param i The current hour (in half hour steps)
+     * @param day The day Object
+     */
     private static getHourInstance(i: number, day: { day: TDay; data: IHour[] }): { hourObject: any, hourInstance: any } {
         let hour = Math.floor(i);
         if (hour === 24) hour = hour - 24;
