@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import * as fs from "fs";
+import * as path from "path";
 
 import {TOpeningHours} from "src/config";
 import jsonSchema from "src/storage/json.schema";
@@ -18,7 +18,6 @@ import {
     TWeek,
     TYear,
 } from "./stoarge.interfaces";
-import ErrnoException = NodeJS.ErrnoException;
 
 /**
  * An object which handles the updating and storing of the collected data
@@ -113,44 +112,25 @@ export default class DataStorage {
      * @param fileName Optional the filename the data should be loaded from
      */
     public async loadFromFile(fileName = this._fileName): Promise<void> {
-        return new Promise((resolve, reject) => {
-            fs.readFile(fileName, (err, data) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                const fileData = JSON.parse(data.toString("utf8"));
-                try {
-                    this.validateJSON(fileData);
-                } catch (e) {
-                    reject(e);
-                }
-
-                this._data = fileData;
-                resolve();
-            });
-        });
+        const fileBuffer: Buffer = await fs.promises.readFile(fileName);
+        this.data = JSON.parse(fileBuffer.toString());
     }
 
     /**
      * Write the internal data to a file
      * @param fileName Optional the filename the data should be saved to
      */
-    public writeToFile(fileName = this._fileName): Promise<any> {
-        return new Promise((resolve, reject) => {
+    public async writeToFile(fileName = this._fileName): Promise<any> {
 
-            const dirName = path.dirname(this._fileName);
-            if (!fs.existsSync(dirName)) {
-                // TODO create dir and check out fs promises
-                await fs_p.mkdir(dirName, {recursive: true});
-            }
+        // Create the directory of the database
+        const dirName = path.dirname(this._fileName);
+        if (!fs.existsSync(dirName)) {
+            await fs.promises.mkdir(dirName, {recursive: true});
+        }
 
-            const dataString = JSON.stringify(this._data);
-            fs.writeFile(fileName, dataString, (e: ErrnoException | null) => {
-                if (e) return reject(e);
-                return resolve(null);
-            });
-        });
+        // Write the file
+        const dataString = JSON.stringify(this._data);
+        await fs.promises.writeFile(fileName, dataString);
     }
 
     /**

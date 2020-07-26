@@ -1,5 +1,3 @@
-import {Config} from "../config";
-
 type JumpersData = { "maxCheckinsAllowed": number, "countCheckedInCustomer": number }
 
 /**
@@ -12,11 +10,9 @@ export function extractJumperData(data: string): number {
 
 
     let maxPersons = 80;
-    if (dataJSON?.countCheckedInCustomer) {
-        maxPersons = dataJSON.countCheckedInCustomer;
+    if (dataJSON?.maxCheckinsAllowed) {
+        maxPersons = dataJSON.maxCheckinsAllowed;
     }
 
-    Config.jumpers_friedrichshafen.maxPersonCount = maxPersons;
-
-    return dataJSON.countCheckedInCustomer / maxPersons;
+    return (dataJSON.countCheckedInCustomer / maxPersons) * 100;
 }
