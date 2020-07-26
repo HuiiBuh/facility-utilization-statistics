@@ -23,6 +23,9 @@ interface State {
     estimation: boolean
     month: boolean
     year: boolean
+
+    success: boolean
+    error?: Response
 }
 
 export default class Facility extends React.Component {
@@ -35,9 +38,10 @@ export default class Facility extends React.Component {
         estimation: false,
         month: false,
         year: false,
+        success: true
     };
 
-    constructor(props: any) {
+    constructor(props: Props) {
         super(props);
         this.props = props;
     }
@@ -82,7 +86,8 @@ export default class Facility extends React.Component {
                 week: false,
                 estimation: false,
                 month: false,
-                year: false
+                year: false,
+                success: true
             };
             stateUpdate[key] = true;
             this.setState(stateUpdate);
@@ -97,6 +102,10 @@ export default class Facility extends React.Component {
         return (event: React.KeyboardEvent<HTMLAnchorElement>): void => {
             event.key === "Enter" && this.updateActiveButton(key)();
         };
+    };
+
+    requestError = (response: Response) => {
+        this.setState({success: false, error: response});
     };
 
 
@@ -114,6 +123,12 @@ export default class Facility extends React.Component {
 
 
     render() {
+
+        if (this.state.success) return this.renderSuccess();
+        else return this.renderError();
+    }
+
+    renderSuccess() {
         return (
             <div className="full-height">
 
@@ -128,13 +143,15 @@ export default class Facility extends React.Component {
                     <Switch>
 
                         <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/`} exact>
-                            <Current facility={this.props.identifier}/>
+                            <Current facility={this.props.identifier} notFoundCallback={this.requestError}/>
                         </Route>
                         <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/week`} exact>
-                            <LineGraphLoader facility={this.props.identifier} scope="week"/>
+                            <LineGraphLoader facility={this.props.identifier} scope="week"
+                                             notFoundCallback={this.requestError}/>
                         </Route>
                         <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/estimation`} exact>
-                            <LineGraphLoader facility={this.props.identifier} scope="estimation"/>
+                            <LineGraphLoader facility={this.props.identifier} scope="estimation"
+                                             notFoundCallback={this.requestError}/>
                         </Route>
                         <Route path={`${this.props.baseURL}/facility/${this.props.identifier}/month`} exact>
                             <h1 className="text-center">Coming soon</h1>
@@ -198,5 +215,18 @@ export default class Facility extends React.Component {
                 </div>
             </div>
         );
+    }
+
+    renderError() {
+        const statusCode = this.state.error?.status ? this.state.error.status : 0;
+        if (statusCode === 404) {
+            return <h1 className="text-center">Facility does not exist</h1>;
+        } else if (statusCode >= 500) {
+            return <h1 className="text-center">Internal server error</h1>;
+        } else if (statusCode < 500 && statusCode >= 400) {
+            return <h1 className="text-center">Client error</h1>;
+        } else {
+            return <h1 className="text-center">Unknown error</h1>;
+        }
     }
 }

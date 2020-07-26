@@ -1,12 +1,13 @@
 import deepEqual from "deep-equal";
 import React from "react";
 import {LineGraph} from "../../graphs";
-import {createLabels} from "../functions";
+import {createLabels, customFetch} from "../functions";
 import {IWeek, IWeekOverview} from "./line-graph-loader.interfaces";
 
 
 interface Props {
     facility: string
+    notFoundCallback: (e: Response) => any
     scope: "estimation" | "week" | "year"
 }
 
@@ -47,8 +48,13 @@ export default class LineGraphLoader extends React.Component {
      * Make a api call to fetch the data and update the state
      */
     async updateComponent(): Promise<void> {
-        const response: object = await fetch(`/api/facility/${this.props.facility}/${this.props.scope}`)
-            .then(async (response) => await response.json());
+        let response: IWeek;
+        try {
+            response = await customFetch<IWeek>(`/api/facility/${this.props.facility}/${this.props.scope}`, this.props.notFoundCallback);
+        } catch (e) {
+            console.debug(e);
+            return;
+        }
 
         this.setState({data: response, scope: this.props.scope});
     }

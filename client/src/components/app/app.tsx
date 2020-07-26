@@ -7,7 +7,7 @@ import {IFacility} from "./app-interfaces";
 import "./app.scss";
 
 type State = {
-    entryList: { identifier: string, name: string }[];
+    facilityList: { identifier: string, name: string }[];
     entryObject: Record<string, string>
 }
 
@@ -20,11 +20,11 @@ class App extends React.Component {
         const response: IFacility[] = await fetch("/api/facility/all")
             .then(async (response) => await response.json());
 
-        const entryList = [];
+        const facilityList = [];
         const entryObject: Record<string, string> = {};
         for (const facility of response) {
 
-            entryList.push({
+            facilityList.push({
                 identifier: facility.identifier,
                 name: facility.name
             });
@@ -32,7 +32,7 @@ class App extends React.Component {
             entryObject[facility.identifier] = facility.name;
         }
 
-        this.setState({entryList: entryList, entryObject: entryObject});
+        this.setState({facilityList: facilityList, entryObject: entryObject});
     }
 
     render() {
@@ -48,7 +48,7 @@ class App extends React.Component {
                     <Route path="/">
                         <div className="fullscreen flex">
 
-                            <Sidenav entries={this.state.entryList}/>
+                            <Sidenav entries={this.state.facilityList}/>
 
                             <div className="right">
                                 {this.mainContent("")}
@@ -64,7 +64,7 @@ class App extends React.Component {
     }
 
     state: State = {
-        entryList: [],
+        facilityList: [],
         entryObject: {}
     };
 
@@ -81,7 +81,7 @@ class App extends React.Component {
                 <Credits/>
             </Route>
             <Route exact path={`${baseURL}/admin`}>
-                <Admin/>
+                <Admin facilityList={this.state.facilityList}/>
             </Route>
             <Route path={`/`} exact>
                 <h1 className="text-center">Wähle eine Einrichtung</h1>

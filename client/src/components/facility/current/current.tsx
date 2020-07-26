@@ -1,6 +1,6 @@
 import React from "react";
 import {BarGraph, LineGraph} from "../../graphs";
-import {createLabels} from "../functions";
+import {createLabels, customFetch} from "../functions";
 import {ICurrent, IWeek} from "../line-graph-loader/line-graph-loader.interfaces";
 
 
@@ -11,6 +11,7 @@ interface State {
 
 interface Props {
     facility: string
+    notFoundCallback: (e: Response) => any
 }
 
 export default class Current extends React.Component {
@@ -46,11 +47,21 @@ export default class Current extends React.Component {
      * Update the component with the most recent data from the server
      */
     async updateComponent(): Promise<void> {
-        const day: IWeek = await fetch(`/api/facility/${this.props.facility}/today`)
-            .then(async (response) => await response.json());
+        let day: IWeek;
+        try {
+            day = await customFetch<IWeek>(`/api/facility/${this.props.facility}/today`, this.props.notFoundCallback);
+        } catch (e) {
+            console.debug(e);
+            return;
+        }
 
-        const current: ICurrent = await fetch(`/api/facility/${this.props.facility}/current`)
-            .then(async (response) => await response.json());
+        let current: ICurrent;
+        try {
+            current = await customFetch<ICurrent>(`/api/facility/${this.props.facility}/current`, this.props.notFoundCallback);
+        } catch (e) {
+            console.debug(e);
+            return;
+        }
 
         Current.updateColor(current);
 

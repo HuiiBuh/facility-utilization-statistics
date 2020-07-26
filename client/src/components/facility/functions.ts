@@ -17,3 +17,13 @@ export function createLabels(length: number, openHour: number, closeHour: number
 
     return labelList;
 }
+
+export async function customFetch<T>(url: string, errorCallback: (error: Response) => any): Promise<T> {
+    return await fetch(url)
+        .then(async (response) => {
+            if (response.ok) return await response.json();
+
+            errorCallback(response);
+            throw new Error(await response.text());
+        });
+}

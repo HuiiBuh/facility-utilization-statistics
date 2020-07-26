@@ -6,7 +6,20 @@ interface State {
     currentFile: string | null
 }
 
+interface Props {
+    facilityList: { identifier: string, name: string }[];
+}
+
 export default class Admin extends React.Component {
+
+    constructor(props: Props) {
+        super(props);
+        this.props = props;
+    }
+
+    props: Props = {
+        facilityList: []
+    };
 
     state: State = {
         currentFile: null
@@ -123,8 +136,10 @@ export default class Admin extends React.Component {
                     <input type="password" placeholder="Passwort"/>
                     <div className="custom-select">
                         <select>
-                            <option value="bloeckle">Blöckle</option>
-                            <option value="kletterbox">Kletterbox</option>
+                            {this.props.facilityList.map((value, index) => {
+                                return <option value={value.identifier} key={index}>{value.name}</option>;
+                            })
+                            }
                         </select>
                     </div>
 
