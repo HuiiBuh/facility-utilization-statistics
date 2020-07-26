@@ -18,8 +18,8 @@ if (environment === "production") {
         cert: readFileSync("/keys/nestjs.cert"),
     };
 
-    bootstrap(80, httpsOptions).then(() => {
-        console.log(`\x1b[32m Visit\x1b[30m http://localhost:80 \n\n`);
+    bootstrap(443, httpsOptions).then(() => {
+        console.log(`\x1b[32m Visit\x1b[30m http://localhost:443 \n\n`);
     }).catch(e => console.log(e));
 } else {
     bootstrap(3500).then(() => {
